@@ -63,3 +63,9 @@ input {
 select {
     max-width: 100%;
 }
+
+.figure {
+    display: block;
+    text-align: center;
+    margin: auto;
+}
