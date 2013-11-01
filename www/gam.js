@@ -96,6 +96,8 @@ if (typeof String.prototype.startsWith != 'function') {
   };
 }
 
+homeTab = "work"
+
 $(document).ready(function() {
     var hash = document.location.hash;
     var prefix="#tab-";
@@ -104,7 +106,7 @@ $(document).ready(function() {
             hash = hash.replace(prefix, "#");
         }
     } else {
-        hash = "#home";
+        hash = "#" + homeTab;
     }
     document.location.hash = hash;
     $('.nav-tabs a[href='+hash.replace("#", prefix)+']').tab('show') ;
@@ -124,7 +126,7 @@ $(window).on("popstate", function() {
         }
         $('.nav-tabs a[href='+hash.replace("#", prefix)+']').tab('show') ;
     } else {
-        $('.nav-tabs a[href="#tab-home"]').tab('show') ;
+        $('.nav-tabs a[href="#tab-'+homeTab+'"]').tab('show') ;
 
     }
 })
