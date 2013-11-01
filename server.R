@@ -23,7 +23,6 @@ renderGraph <- function(expr, env=parent.frame(), quoted=FALSE) {
         if (is.null(val)) {
             return(list(nodes=list(), links=list()));
         }
-        print(module2list(val))
         module2list(val)
     }
 }
@@ -255,7 +254,6 @@ shinyServer(function(input, output) {
     })
     
     rawModuleInput <- reactive({
-        print(input$find)
         met.fdr <- isolate(input$metFDR)
         gene.fdr <- isolate(input$geneFDR)
         absent.met.score=isolate(input$absentMetScore)
@@ -281,7 +279,6 @@ shinyServer(function(input, output) {
     })
     
     moduleInput <- reactive({
-        print("moduleInput: stat")
         module <- rawModuleInput()
         if (is.null(module)) {
             return(NULL)
@@ -316,19 +313,15 @@ shinyServer(function(input, output) {
             module <- expandReactionNodeAttributesToEdges(module)
         }
             
-        print("moduleInput: finish")
-        print(module)
         module
     })
     
     output$moduleSummary <- reactive({
-        print("moduleSummary: start")
         module <- moduleInput()
         if (is.null(module)) {
             return("There is no module yet")
         }
         
-        print("moduleSummary: finish")
         vector2html(c(
             "number of nodes" = length(V(module)),
             "number of edges" = length(E(module))
