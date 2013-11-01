@@ -1,5 +1,5 @@
-www/index.html: www/help.xhtml www/index.m4
-	(cd www; m4 -P index.m4 > index.html)
+www/index.html: help.xhtml index.m4
+	m4 -P index.m4 > www/index.html
 
-www/help.xhtml: www/help.markdown
-	pandoc -o www/help.xhtml www/help.markdown
+help.xhtml: help.markdown
+	pandoc -o help.xhtml help.markdown
