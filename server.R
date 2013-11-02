@@ -254,6 +254,7 @@ shinyServer(function(input, output) {
     })
     
     rawModuleInput <- reactive({
+        input$find
         met.fdr <- isolate(input$metFDR)
         gene.fdr <- isolate(input$geneFDR)
         absent.met.score=isolate(input$absentMetScore)
