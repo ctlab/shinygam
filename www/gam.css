@@ -69,4 +69,11 @@ select {
     text-align: center;
     margin: auto;
 }
+.jslider .jslider-scale ins {
+    width: 40px;
+    text-align: center;
+}
 
+span.jslider {
+    margin-bottom: 26px;
+}

@@ -145,6 +145,39 @@ window.onload = function() {
         placement: "right",
         delay: { show: 0, hide: 0 }
     });
+    $("#metMinusLogFDR").slider({
+        from: 0,
+        to: 12 * 4,
+        step: 1,
+        limits: false,
+        scale: [ "1e-1", "1e-5", "1e-9", "1e-13" ],
+        calculate: function(value) {
+            return Math.pow(10, -1 - value / 4.).toExponential(2);
+        },
+        
+        multiple: false,
+        onstatechange: function(value) {
+            $("#metFDR")[0].value = Math.pow(10, -value);
+        },
+        smooth: false
+    });
+    $("#geneMinusLogFDR").slider({
+        from: 0,
+        to: 12 * 4,
+        step: 1,
+        limits: false,
+        scale: [ "1e-1", "1e-5", "1e-9", "1e-13" ],
+        calculate: function(value) {
+            return Math.pow(10, -1 - value / 4.).toExponential(2);
+        },
+        
+        multiple: false,
+        onstatechange: function(value) {
+            $("#geneFDR")[0].value = Math.pow(10, -value);
+        },
+        smooth: false
+    });
+
 }
 
 function loadGraph(container, graph) {

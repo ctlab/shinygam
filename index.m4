@@ -7,9 +7,10 @@
     <link rel="stylesheet" type="text/css" href="shared/shiny.css"/>
     <link rel="stylesheet" type="text/css" href="shared/slider/css/jquery.slider.min.css"/>
     <script src="shared/slider/js/jquery.slider.min.js"></script>
+
+
     <link rel="stylesheet" type="text/css" href="shared/bootstrap/css/bootstrap.min.css"/>
     <script src="shared/bootstrap/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="shared/bootstrap/css/bootstrap.min.css"/>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
@@ -19,6 +20,8 @@
     <title>Shiny GAM</title>
   </head>
   <body>
+<div>
+</div>
       <div id="networkParameters" class="js-output">
           <script>
               network = {
@@ -168,6 +171,7 @@
                                           </a>
                                       </label>
                                       <input id="metFDR" type="number" value="1e-06" min="1e-100" max="1" step="1e-200"/>
+                                      <!--<input id="metMinusLogFDR" name="metMinusLogFDR" class="minusLogFDR" type="slider" value="5" data-skin="plastic"/>-->
 
                                       <label for="absentMetScore">Score for absent metabolites
                                           <a id="absentMetScore-tooltip" class="help-tooltip" href="#" 
