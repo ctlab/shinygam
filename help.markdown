@@ -17,7 +17,7 @@ Currently supported organisms are Homo sapiens and Mus musculus. If your
 organism is not supported, please contact <a
 href="mailto:asergushichev@wustl.edu">asergushichev@wustl.edu</a>.
 
-<!-- :ToDo: add screenshot? -->
+<!-- :ToDo: add a screenshot? -->
 
 The next step is to upload gene and/or metabolite DE data. GAM can be run using
 either gene DE data or metabolite DE data or both datasets. Each DE dataset
@@ -104,6 +104,16 @@ Click "Find module" button to find a module in the network. The module will
 be shown on the right panel.
 
 ![Example of a module](img/module.png)
+
+#### Graph legend
+
+We use the following scheme:
+
+* Red nodes and edges are up-regulated.
+* Green nodes and edges are down-regulated.
+* Blue nodes and edges don't have *logFC* values.
+* Bigger size of nodes and width of edges means lower p-values.
+* Dashed edges are trans-RPAIRs.
 
 #### Post-processing
 

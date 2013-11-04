@@ -290,7 +290,7 @@ target="_blank">GAM</a> (Gene And Metabolic data analysis) R-package. GAM analyz
 <h4 id="constructing-a-network">Constructing a network</h4>
 <p>To construct a network select an organism from the <em>Select an organism</em> dropdown menu. Only reactions possible in the selected organism are used. Currently supported organisms are Homo sapiens and Mus musculus. If your organism is not supported, please contact <a
 href="mailto:asergushichev@wustl.edu">asergushichev@wustl.edu</a>.</p>
-<!-- :ToDo: add screenshot? -->
+<!-- :ToDo: add a screenshot? -->
 
 <p>The next step is to upload gene and/or metabolite DE data. GAM can be run using either gene DE data or metabolite DE data or both datasets. Each DE dataset must be in a separate tab-delimited file. The first line of each file must contain a header with column names. The columns of each file are:</p>
 <ul>
@@ -322,6 +322,15 @@ href="mailto:asergushichev@wustl.edu">asergushichev@wustl.edu</a>.</p>
 <div class="figure">
 <img src="img/module.png" alt="Example of a module" /><p class="caption">Example of a module</p>
 </div>
+<h4 id="graph-legend">Graph legend</h4>
+<p>We use the following scheme:</p>
+<ul>
+<li>Red nodes and edges are up-regulated.</li>
+<li>Green nodes and edges are down-regulated.</li>
+<li>Blue nodes and edges don't have <em>logFC</em> values.</li>
+<li>Bigger size of nodes and width of edges mean lower p-values.</li>
+<li>Dashed edges are trans-RPAIRs.</li>
+</ul>
 <h4 id="post-processing">Post-processing</h4>
 <p>There are couple of post-processing steps that are available. If in the network reactions are edges and RPAIRs are used, then trans-connections can be added. When reactions are nodes, the following operations can be applied:</p>
 <ul>

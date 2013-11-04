@@ -1,5 +1,5 @@
 .node circle {
-  stroke: #fff;
+  stroke: #eeeeee;
   stroke-width: 1.5px;
 }
 
@@ -69,3 +69,4 @@ select {
     text-align: center;
     margin: auto;
 }
+
