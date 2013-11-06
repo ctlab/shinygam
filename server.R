@@ -5,8 +5,9 @@ library(GAM)
 
 
 options(shiny.error=traceback)
-data(kegg.mouse.network)
-data(kegg.human.network)
+load("./data/kegg.human.network.rda")
+load("./data/kegg.mouse.network.rda")
+
 networks <- list(
     "Mouse musculus"=kegg.mouse.network,
     "Homo sapiens"=kegg.human.network)

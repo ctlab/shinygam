@@ -13,7 +13,7 @@
     <script src="shared/bootstrap/js/bootstrap.min.js"></script>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="d3.v3.min.js" charset="utf-8"></script>
     <script src="gam.js" type="text/javascript"></script>
     <link rel="stylesheet" type="text/css" href="gam.css"/>
     <link rel="stylesheet" type="text/css" href="shared/bootstrap/css/bootstrap-responsive.min.css"/>
