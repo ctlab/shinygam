@@ -263,10 +263,10 @@
                                                   </a>
                                               </span>
                                           </label>
-                                          <label class="checkbox" for="removeSimpleReactions">
-                                              <input id="removeSimpleReactions" type="checkbox"/>
-                                              <span>Remove simple reactions
-                                                  <a id="removeSimpleReactions-tooltip" class="help-tooltip" href="#" 
+                                          <label class="checkbox" for="simplifyReactionNodes">
+                                              <input id="simplifyReactionNodes" type="checkbox"/>
+                                              <span>Simplify reaction nodes
+                                                  <a id="simplifyReactionNodes-tooltip" class="help-tooltip" href="#" 
                                                       title='Replacing reaction nodes with edges for reactions that connect only two metabolites in the module and these two metabolites are on different sides of the reaction.'>
                                                       <i class="icon-question-sign"></i>
                                                   </a>

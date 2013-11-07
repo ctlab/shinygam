@@ -190,7 +190,7 @@ function loadGraph(container, graph) {
 
     container.force = d3.layout.force()
         .nodes(graph.nodes)
-        .links(graph.links)
+        .links(graph.edges)
         .charge(-300)
         .linkDistance(100)
         .size([width, height])
@@ -204,7 +204,7 @@ function loadGraph(container, graph) {
     var svg = container.svg;
 
     var link = svg.selectAll(".link")
-        .data(graph.links)
+        .data(graph.edges)
         .enter().append("line")
         .attr("class", "link")
         .style("stroke", getColor)
@@ -213,7 +213,7 @@ function loadGraph(container, graph) {
 
 
     var edgepaths = svg.selectAll(".edgepath")
-        .data(graph.links)
+        .data(graph.edges)
         .enter()
         .append('path')
         .attr({'d': function(d) {return 'M '+d.source.x+' '+d.source.y+' L '+ d.target.x +' '+d.target.y},
@@ -226,7 +226,7 @@ function loadGraph(container, graph) {
         .style("pointer-events", "none");
 
     var edgelabels = svg.selectAll(".edgelabel")
-        .data(graph.links)
+        .data(graph.edges)
         .enter()
         .append('text')
         .style("pointer-events", "none")

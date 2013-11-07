@@ -309,8 +309,8 @@ shinyServer(function(input, output) {
                 module <- removeHangingNodes(module)
             }
             
-            if (input$removeSimpleReactions) {
-                module <- removeSimpleReactions(module, es)
+            if (input$simplifyReactionNodes) {
+                module <- simplifyReactionNodes(module, es)
             }
             module <- expandReactionNodeAttributesToEdges(module)
         }
