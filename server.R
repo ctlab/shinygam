@@ -92,7 +92,8 @@ shinyServer(function(input, output) {
         if (is.null(data)) {
             return(NULL)
         }
-        GAM:::lazyData("gene.id.map")
+        network <- networks[[isolate(input$network)]]
+        gene.id.map <- network$gene.id.map
         res <- getIdsType(data$ID, gene.id.map)
         if (length(res) != 1) {
             stop("Can't determine type of IDs for genes")
