@@ -26,11 +26,11 @@ Shiny.outputBindings.register(jsOutputBinding, "alserg.jsOutputBinding");
 positiveFCScale = d3.scale.linear().clamp(true).domain([0,2]).range(["#cccccc","#ff0000"]);
 negativeFCScale = d3.scale.linear().clamp(true).domain([0,-2]).range(["#cccccc","#00ff00"]);
 function getColor(d) {
-    if (d.logFC === parseFloat(d.logFC)) {
-        if (d.logFC >= 0) {
-            return positiveFCScale(d.logFC);
+    if (d.log2FC === parseFloat(d.log2FC)) {
+        if (d.log2FC >= 0) {
+            return positiveFCScale(d.log2FC);
         } else {
-            return negativeFCScale(d.logFC);
+            return negativeFCScale(d.log2FC);
         }
     }
     return "#00acad";
