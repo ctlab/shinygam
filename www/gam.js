@@ -52,6 +52,8 @@ function initContainer(container) {
 
 
     container.svg = d3.select(container).append("svg")
+        .attr("width", width)
+        .attr("height", height)
         .append("g");
 
 
@@ -181,6 +183,9 @@ window.onload = function() {
 }
 
 function loadGraph(container, graph) {
+    if (!("nodes" in graph) || !("edges" in graph)) {
+        return;
+    }
 
     var width = $(container).width(),
         height = $(container).height();
