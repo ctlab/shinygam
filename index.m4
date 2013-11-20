@@ -13,10 +13,11 @@
     <script src="shared/bootstrap/js/bootstrap.min.js"></script>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <script src="d3.v3.min.js" charset="utf-8"></script>
+    <script src="d3.v3.js" charset="utf-8"></script>
     <script src="gam.js" type="text/javascript"></script>
     <link rel="stylesheet" type="text/css" href="gam.css"/>
     <link rel="stylesheet" type="text/css" href="shared/bootstrap/css/bootstrap-responsive.min.css"/>
+    <script> (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){ (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o), m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m) })(window,document,'script','//www.google-analytics.com/analytics.js','ga'); ga('create', 'UA-44771306-1', 'wustl.edu'); ga('send', 'pageview'); </script>
     <title>Shiny GAM</title>
   </head>
   <body>
