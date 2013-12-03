@@ -301,7 +301,7 @@ href="mailto:asergushichev@wustl.edu">asergushichev@wustl.edu</a>.</p>
 <ul>
 <li>&quot;ID&quot; for the RefSeq mRNA transcript ID or Entrez ID (for the gene DE file) and the HMDB or KEGG ID (for the metabolite DE file);</li>
 <li>&quot;pval&quot; for the p-value;</li>
-<li>&quot;logFC&quot; for the natural logarithm of the fold-change.</li>
+<li>&quot;log2FC&quot; for the base 2 logarithm of the fold-change.</li>
 </ul>
 <p>The last column is optional, but we recommend to provide it if possible, as it's used for colors in graph visualizing. Any other columns will be copied to a network as node or edge attributes. We recommend to exclude genes with low expression prior uploading. Example data for genes and metabolites can be downloaded <a href="/publications/supp_materials/GAM/">here</a>.</p>
 <p>After files are uploaded, a file summary is displayed. Verify that the files were parsed correctly.</p>
@@ -332,7 +332,7 @@ href="mailto:asergushichev@wustl.edu">asergushichev@wustl.edu</a>.</p>
 <ul>
 <li>Red nodes and edges are up-regulated.</li>
 <li>Green nodes and edges are down-regulated.</li>
-<li>Blue nodes and edges don't have <em>logFC</em> values.</li>
+<li>Blue nodes and edges don't have <em>log2FC</em> values.</li>
 <li>Bigger size of nodes and width of edges means lower p-values.</li>
 <li>Dashed edges are trans-RPAIRs.</li>
 </ul>

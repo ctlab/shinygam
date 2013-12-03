@@ -27,7 +27,7 @@ contain a header with column names. The columns of each file are:
 * "ID" for the RefSeq mRNA transcript ID or Entrez ID (for the gene DE file)
   and the HMDB or KEGG ID (for the metabolite DE file);
 * "pval" for the p-value;
-* "logFC" for the natural logarithm of the fold-change.
+* "log2FC" for the base 2 logarithm of the fold-change.
 
 The last column is optional, but we recommend to provide it if possible, as it's
 used for colors in graph visualizing. Any other columns will be copied to a
@@ -111,7 +111,7 @@ We use the following scheme:
 
 * Red nodes and edges are up-regulated.
 * Green nodes and edges are down-regulated.
-* Blue nodes and edges don't have *logFC* values.
+* Blue nodes and edges don't have *log2FC* values.
 * Bigger size of nodes and width of edges means lower p-values.
 * Dashed edges are trans-RPAIRs.
 
