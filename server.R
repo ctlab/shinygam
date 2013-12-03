@@ -84,6 +84,7 @@ shinyServer(function(input, output) {
             stop(paste0("Genomic differential expression data should contain at least these fields: ", 
                         paste(necessary.de.fields, collapse=", ")))
         }
+        attr(res, "name") <- input$geneDE$name
         res
     })
     
@@ -111,6 +112,7 @@ shinyServer(function(input, output) {
         div(
             HTML(
                 vector2html(c(
+                    "name" = attr(gene.de, "name"),
                     "length" = nrow(gene.de),
                     "ID type" = ids.type
                 ))),
@@ -122,7 +124,7 @@ shinyServer(function(input, output) {
         if (is.null(data)) {
             return(NULL)
         }
-        format(head(data[order(pval)]))
+        format(as.data.frame(head(data[order(pval)])), digits=3)
     })
     
     
@@ -131,12 +133,14 @@ shinyServer(function(input, output) {
             # User has not uploaded a file yet
             return(NULL)
         }
+        print(input$metDE$name)
         
         res <- data.table(read.table(input$metDE$datapath, sep="\t", header=T, stringsAsFactors=F))
         if (!all(necessary.de.fields %in% names(res))) {
             stop(paste0("Metabolic differential expression data should contain at least these fields: ", 
                         paste(necessary.de.fields, collapse=", ")))
         }
+        attr(res, "name") <- input$metDE$name
         res
     })
     
@@ -163,6 +167,7 @@ shinyServer(function(input, output) {
         div(
             HTML(
                 vector2html(c(
+                    "name" = attr(met.de, "name"),
                     "length" = nrow(met.de),
                     "ID type" = ids.type
                 ))),
@@ -174,7 +179,7 @@ shinyServer(function(input, output) {
         if (is.null(data)) {
             return(NULL)
         }
-        format(head(data[order(pval)]))
+        format(as.data.frame(head(data[order(pval)])), digits=3)
     })
     
     esInput <- reactive({
@@ -182,10 +187,20 @@ shinyServer(function(input, output) {
         network <- networks[[isolate(input$network)]]
         gene.de <- isolate(geneDEInput())
         gene.ids <- isolate(geneIdsType())
+
         met.de <- isolate(metDEInput())
         met.ids <- isolate(metIdsType())
+
         if (is.null(gene.de) && is.null(met.de)) {
             return(NULL)
+        }
+
+        if (!is.null(gene.de)) {
+            gene.de <- gene.de[which(gene.de$pval < 1),]
+        }
+
+        if (!is.null(met.de)) {
+            met.de <- met.de[which(met.de$pval < 1),]
         }
         
         reactions.as.edges = isolate(input$reactionsAs) == "edges"
