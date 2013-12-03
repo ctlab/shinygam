@@ -133,7 +133,6 @@ shinyServer(function(input, output) {
             # User has not uploaded a file yet
             return(NULL)
         }
-        print(input$metDE$name)
         
         res <- data.table(read.table(input$metDE$datapath, sep="\t", header=T, stringsAsFactors=F))
         if (!all(necessary.de.fields %in% names(res))) {
@@ -318,7 +317,7 @@ shinyServer(function(input, output) {
                 module <- addInterconnections(module, es)
             }
             
-            if ("logFC" %in% list.vertex.attributes(module))
+            if ("log2FC" %in% list.vertex.attributes(module))
             module <- addNormLogFC(module)
             
             if (input$removeHangingNodes) {
