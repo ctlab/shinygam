@@ -24,6 +24,26 @@ renderGraph <- function(expr, env=parent.frame(), quoted=FALSE) {
         if (is.null(val)) {
             return(list(nodes=list(), links=list()));
         }
+        for (a in list.vertex.attributes(val)) {
+            if (!is.numeric(get.vertex.attribute(val, a))) {
+                next
+            }
+            print(a)
+            vs <- get.vertex.attribute(val, a)
+            vs[which(vs == Inf)] <- 1e100
+            vs[which(vs == -Inf)] <- -1e100
+            val <- set.vertex.attribute(val, a, index=V(val), value=vs)
+        }
+        for (a in list.edge.attributes(val)) {
+            if (!is.numeric(get.edge.attribute(val, a))) {
+                next
+            }
+            print(a)
+            vs <- get.edge.attribute(val, a)
+            vs[which(vs == Inf)] <- 1e100
+            vs[which(vs == -Inf)] <- -1e100
+            val <- set.edge.attribute(val, a, index=E(val), value=vs)
+        }
         module2list(val)
     }
 }
@@ -292,6 +312,12 @@ shinyServer(function(input, output) {
         if (is.null(res) || length(V(res)) == 0) {
             stop("No module found")
         }
+        res$description.string <- paste0(".mp", # min p-value
+                                         if (es$reactions.as.edges) ".re" else ".rn",
+                                         ".mf=", format(met.fdr, scientific=T),
+                                         ".rf=", format(gene.fdr, scientific=T),
+                                         ".ams=", absent.met.score,
+                                         ".ars=", absent.rxn.score)
         res
     })
     
@@ -330,6 +356,7 @@ shinyServer(function(input, output) {
             module <- expandReactionNodeAttributesToEdges(module)
         }
             
+        module$description.string <- rawModuleInput()$description.string
         module
     })
     
@@ -360,13 +387,13 @@ shinyServer(function(input, output) {
      })
     
     output$downloadNetwork <- downloadHandler(
-        filename = "network.xgmml",
+        filename = reactive({ paste0("network.", tolower(esInput()$network$organism), ".xgmml") }),
         content = function(file) {
             saveModuleToXgmml(esInput()$subnet, "network", file)
         })
     
     output$downloadModule<- downloadHandler(
-        filename = "module.xgmml",
+        filename = reactive({ paste0("module", moduleInput()$description.string, ".xgmml") }),
         content = function(file) {
             saveModuleToXgmml(moduleInput(), "module", file)
         })
