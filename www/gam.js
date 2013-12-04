@@ -1,4 +1,13 @@
-graphOutputBinding = new Shiny.OutputBinding();
+Shiny.addCustomMessageHandler("showWaitMessage",
+        function(message) {
+            if (message['value']) {
+                $("#loading").show();
+            } else {
+                $("#loading").hide();
+            }
+        }
+        );
+  graphOutputBinding = new Shiny.OutputBinding();
 graphOutputBinding.find = function(scope) {
     return $(scope).find(".graph-output");
 };

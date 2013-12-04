@@ -91,8 +91,16 @@ makeJsAssignments  <- function(...) {
 }
 
 # Define server logic required to generate and plot a random distribution
-shinyServer(function(input, output) {
+shinyServer(function(input, output, session) {
     
+    longProcessStart <- function() {
+        session$sendCustomMessage(type='showWaitMessage', list(value=T))
+    }
+
+    longProcessStop <- function() {
+        session$sendCustomMessage(type='showWaitMessage', list(value=F))
+    }
+
     geneDEInput <- reactive({
         if (is.null(input$geneDE)) {
             # User has not uploaded a file yet
@@ -214,6 +222,8 @@ shinyServer(function(input, output) {
             return(NULL)
         }
 
+        longProcessStart()
+
         if (!is.null(gene.de)) {
             gene.de <- gene.de[which(gene.de$pval < 1),]
         }
@@ -226,7 +236,7 @@ shinyServer(function(input, output) {
         collapse.reactions = isolate(input$collapseReactions)
         use.rpairs = isolate(input$useRpairs)
         
-        makeExperimentSet(
+        es <- makeExperimentSet(
             network=network,
             met.de=met.de, gene.de=gene.de,
             met.ids=met.ids, gene.ids=gene.ids,
@@ -234,6 +244,8 @@ shinyServer(function(input, output) {
             collapse.reactions=collapse.reactions,
             use.rpairs=use.rpairs,
             plot=F)
+        longProcessStop()
+        es
     })
     
     output$networkSummary <- reactive({
@@ -268,8 +280,7 @@ shinyServer(function(input, output) {
     })
     
     output$showModulePanel <- renderJs({
-        if (!is.null(esInput())) {
-            return("mp = $('#module-panel'); mp[0].scrollIntoView();")
+        if (!is.null(esInput())) { return("mp = $('#module-panel'); mp[0].scrollIntoView();")
         }
         # return("mp = $('#module-panel'); mp.hide();")
         return("")
@@ -302,6 +313,7 @@ shinyServer(function(input, output) {
             return(NULL)
         }
 
+        longProcessStart()
         res <- findModule(es,
                     met.fdr=met.fdr,
                     gene.fdr=gene.fdr,
@@ -318,6 +330,7 @@ shinyServer(function(input, output) {
                                          ".rf=", format(gene.fdr, scientific=T),
                                          ".ams=", absent.met.score,
                                          ".ars=", absent.rxn.score)
+        longProcessStop()
         res
     })
     

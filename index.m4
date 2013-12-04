@@ -21,8 +21,14 @@
     <title>Shiny GAM</title>
   </head>
   <body>
-<div>
-</div>
+  <div id="loading">
+    <div id="loading-dialog">
+        <span>
+            <p>Please wait for operation to finish...</p>
+            <img src="loader.gif"></img>
+        </span>
+    </div>
+  </div>
       <div id="networkParameters" class="js-output">
           <script>
               network = {
