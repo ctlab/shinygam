@@ -224,28 +224,29 @@ shinyServer(function(input, output, session) {
 
         longProcessStart()
 
-        if (!is.null(gene.de)) {
-            gene.de <- gene.de[which(gene.de$pval < 1),]
-        }
+        tryCatch({
+            if (!is.null(gene.de)) {
+                gene.de <- gene.de[which(gene.de$pval < 1),]
+            }
 
-        if (!is.null(met.de)) {
-            met.de <- met.de[which(met.de$pval < 1),]
-        }
-        
-        reactions.as.edges = isolate(input$reactionsAs) == "edges"
-        collapse.reactions = isolate(input$collapseReactions)
-        use.rpairs = isolate(input$useRpairs)
-        
-        es <- makeExperimentSet(
-            network=network,
-            met.de=met.de, gene.de=gene.de,
-            met.ids=met.ids, gene.ids=gene.ids,
-            reactions.as.edges=reactions.as.edges,
-            collapse.reactions=collapse.reactions,
-            use.rpairs=use.rpairs,
-            plot=F)
-        longProcessStop()
-        es
+            if (!is.null(met.de)) {
+                met.de <- met.de[which(met.de$pval < 1),]
+            }
+            
+            reactions.as.edges = isolate(input$reactionsAs) == "edges"
+            collapse.reactions = isolate(input$collapseReactions)
+            use.rpairs = isolate(input$useRpairs)
+            
+            es <- makeExperimentSet(
+                network=network,
+                met.de=met.de, gene.de=gene.de,
+                met.ids=met.ids, gene.ids=gene.ids,
+                reactions.as.edges=reactions.as.edges,
+                collapse.reactions=collapse.reactions,
+                use.rpairs=use.rpairs,
+                plot=F)
+            es
+        }, finally=longProcessStop())
     })
     
     output$networkSummary <- reactive({
@@ -286,26 +287,12 @@ shinyServer(function(input, output, session) {
         return("")
     })
     
-    solver <- reactive({
-        solverName <- input$solver
-        if (solverName == "mwcs") {
-            solver <- mwcs.solver(mwcs.path, timeLimit=min(input$mwcsTimeLimit, 120))
-        } else if (solverName == "heinz") {
-            solver <- heinz.solver(heinz.py, timeLimit=min(input$heinzTimeLimit, 240))
-        } else if (solverName == "fastHeinz") {
-            solver <- fastHeinz.solver
-        } else {
-            stop(paste("There is no solver called", solverName))
-        }
-        solver
-    })
-    
     rawModuleInput <- reactive({
         input$find
         met.fdr <- isolate(input$metFDR)
         gene.fdr <- isolate(input$geneFDR)
-        absent.met.score=isolate(input$absentMetScore)
-        absent.rxn.score=isolate(input$absentRxnScore)
+        absent.met.score <- isolate(input$absentMetScore)
+        absent.rxn.score <- isolate(input$absentRxnScore)
         
         es <- isolate(esInput())
         
@@ -313,25 +300,38 @@ shinyServer(function(input, output, session) {
             return(NULL)
         }
 
-        longProcessStart()
-        res <- findModule(es,
-                    met.fdr=met.fdr,
-                    gene.fdr=gene.fdr,
-                    absent.met.score=absent.met.score,
-                    absent.rxn.score=absent.rxn.score,
-                    solver=isolate(solver()))
-        
-        if (is.null(res) || length(V(res)) == 0) {
-            stop("No module found")
+        solverName <- isolate(input$solver)
+        if (solverName == "mwcs") {
+            solver <- mwcs.solver(mwcs.path, timeLimit=min(isolate(input$mwcsTimeLimit), 120))
+        } else if (solverName == "heinz") {
+            solver <- heinz.solver(heinz.py, timeLimit=min(isolate(input$heinzTimeLimit), 240))
+        } else if (solverName == "fastHeinz") {
+            solver <- fastHeinz.solver
+        } else {
+            stop(paste("There is no solver called", solverName))
         }
-        res$description.string <- paste0(".mp", # min p-value
-                                         if (es$reactions.as.edges) ".re" else ".rn",
-                                         ".mf=", format(met.fdr, scientific=T),
-                                         ".rf=", format(gene.fdr, scientific=T),
-                                         ".ams=", absent.met.score,
-                                         ".ars=", absent.rxn.score)
-        longProcessStop()
-        res
+        solver
+
+        longProcessStart()
+        tryCatch({
+            res <- findModule(es,
+                        met.fdr=met.fdr,
+                        gene.fdr=gene.fdr,
+                        absent.met.score=absent.met.score,
+                        absent.rxn.score=absent.rxn.score,
+                        solver=solver)
+            
+            if (is.null(res) || length(V(res)) == 0) {
+                stop("No module found")
+            }
+            res$description.string <- paste0(".mp", # min p-value
+                                             if (es$reactions.as.edges) ".re" else ".rn",
+                                             ".mf=", format(met.fdr, scientific=T),
+                                             ".rf=", format(gene.fdr, scientific=T),
+                                             ".ams=", absent.met.score,
+                                             ".ars=", absent.rxn.score)
+            res
+        }, finally=longProcessStop())
     })
     
     moduleInput <- reactive({
