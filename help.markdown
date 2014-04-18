@@ -15,7 +15,7 @@ To construct a network select an organism from the *Select an organism*
 dropdown menu.  Only reactions possible in the selected organism are used.
 Currently supported organisms are Homo sapiens and Mus musculus. If your
 organism is not supported, please contact <a
-href="mailto:asergushichev@wustl.edu">asergushichev@wustl.edu</a>.
+href="mailto:asergushichev@path.wustl.edu">asergushichev@path.wustl.edu</a>.
 
 <!-- :ToDo: add a screenshot? -->
 

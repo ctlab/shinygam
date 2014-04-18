@@ -90,7 +90,7 @@
                                               <i class="icon-question-sign"></i>
                                           </a>
                                       </label>
-                                      <input id="geneDE" type="file" accept="text/tab-separated-values"/>
+                                      <input id="geneDE" type="file"/>
                                       <label>
                                           File with metabolic DE data: 
                                           <a id="upload-met-data-tooltip" class="help-tooltip" href="#" 
@@ -98,7 +98,7 @@
                                               <i class="icon-question-sign"></i>
                                           </a>
                                       </label>
-                                      <input id="metDE" type="file" accept="text/tab-separated-values"/>
+                                      <input id="metDE" type="file"/>
                                       <label class="control-label" for="reactionsAs">
                                           How to interpret reactions:
                                           <a id="reactionAs-tooltip" class="help-tooltip" href="#" 
@@ -302,7 +302,7 @@
                       <div class="tab-pane" id="tab-about">
                           <div class="row">
                               <div class="span9 offset3">
-                                  <p> By Alexey Sergushichev (<a href="mailto:asergushichev@wustl.edu">asergushichev@wustl.edu</a>)</p>
+                                  <p> By Alexey Sergushichev (<a href="mailto:asergushichev@path.wustl.edu">asergushichev@path.wustl.edu</a>)</p>
                                   <p> This site must not be used for commercial purposes.<p>
                                   <p> You can find source code of this site <a href="https://bitbucket.org/assaron/gam">here</a>.</p>
                                   <div id="GAMVersion" class="shiny-html-output"></div>
