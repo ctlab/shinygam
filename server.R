@@ -15,6 +15,22 @@ networks <- list(
 heinz.py <- "/usr/local/lib/heinz/heinz.py"
 mwcs.path <- "/usr/local/bin/mwcs"
 
+read.table.smart <- function(path) {
+    conn <- file(path)
+    header <- readLines(conn, n=1)
+    close(conn)
+
+    sep <- "\t"
+    for (s in c("\t", " ", ",")) {
+        if (grepl(s, header)) {
+            sep <- s
+            break
+        } 
+    }
+
+    read.table(path, sep=sep, header=T, stringsAsFactors=F)
+}
+
 renderGraph <- function(expr, env=parent.frame(), quoted=FALSE) {
     # Convert the expression + environment into a function
     func <- exprToFunction(expr, env, quoted)
@@ -107,7 +123,7 @@ shinyServer(function(input, output, session) {
             return(NULL)
         }
         
-        res <- data.table(read.table(input$geneDE$datapath, sep="\t", header=T, stringsAsFactors=F))
+        res <- data.table(read.table.smart(input$geneDE$datapath))
         if (!all(necessary.de.fields %in% names(res))) {
             stop(paste0("Genomic differential expression data should contain at least these fields: ", 
                         paste(necessary.de.fields, collapse=", ")))
@@ -162,7 +178,7 @@ shinyServer(function(input, output, session) {
             return(NULL)
         }
         
-        res <- data.table(read.table(input$metDE$datapath, sep="\t", header=T, stringsAsFactors=F))
+        res <- data.table(read.table.smart(input$metDE$datapath))
         if (!all(necessary.de.fields %in% names(res))) {
             stop(paste0("Metabolic differential expression data should contain at least these fields: ", 
                         paste(necessary.de.fields, collapse=", ")))
