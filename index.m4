@@ -69,6 +69,11 @@
                       -->
                       <div class="tab-pane active" id="tab-work">
                           <div class="row">
+                              <div class="span9">
+                                  <div class="alert alert-info" role="alert">If you have any feedback, please send it to <a href="mailto:asergushichev@path.wustl.edu">asergushichev@path.wustl.edu</a></div>
+                              </div>
+                          </div>
+                          <div class="row">
                               <div class="span3">
                                   <form class="well">
                                       <p class="form-header">Construct a network</p>
