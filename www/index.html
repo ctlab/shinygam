@@ -50,7 +50,7 @@
     <div class="container">
       <div class="row">
         <div class="span12" style="padding: 10px 0px;">
-          <h1>Shiny GAM</h1>
+          <h1>Shiny GAM: integrated analysis of genes and metabolites</h1>
         </div>
       </div>
       <div class="row">
