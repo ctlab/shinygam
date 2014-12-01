@@ -7,4 +7,4 @@ help.xhtml: help.markdown
 	pandoc -o help.xhtml help.markdown
 
 www/d3.v3.min.js:
-	wget http://d3js.org/d3.v3.min.js
+	wget http://d3js.org/d3.v3.min.js -O www/d3.v3.min.js
