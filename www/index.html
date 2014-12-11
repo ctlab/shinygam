@@ -300,146 +300,64 @@
                       <div class="tab-pane" id="tab-help">
                           <div class="row">
                               <div class="span9 offset3">
-                                  <p
->This application is a web-interface to the <a href="bioconductor/GAM" target="_blank">GAM</a> (Gene And Metabolic data analysis) R-package. GAM analyzes gene and/or metabolic differential expression (DE) data in a context of biochemical reactions.</p
-><p
->Analysis consists of creating a network describing connections between metabolites and reactions specific to the data and finding a connected module that contains the most significant changes.</p
-><div id="constructing-a-network"
-><h4
-  >Constructing a network</h4
-  ><p
-  >To construct a network select an organism from the <em
-    >Select an organism</em
-    > dropdown menu. Only reactions possible in the selected organism are used. Currently supported organisms are Homo sapiens and Mus musculus. If your organism is not supported, please contact <a href="mailto:asergushichev@path.wustl.edu">asergushichev@path.wustl.edu</a>.</p
-  ><!-- :ToDo: add a screenshot? -->
-<p
-  >The next step is to upload gene and/or metabolite DE data. GAM can be run using either gene DE data or metabolite DE data or both datasets. Each DE dataset must be in a separate tab-delimited file. The first line of each file must contain a header with column names. The columns of each file are:</p
-  ><ul
-  ><li
-    >&quot;ID&quot; for the RefSeq mRNA transcript ID or Entrez ID (for the gene DE file) and the HMDB or KEGG ID (for the metabolite DE file);</li
-    ><li
-    >&quot;pval&quot; for the p-value;</li
-    ><li
-    >&quot;log2FC&quot; for the base 2 logarithm of the fold-change.</li
-    ></ul
-  ><p
-  >The last column is optional, but we recommend to provide it if possible, as it's used for colors in graph visualizing. Any other columns will be copied to a network as node or edge attributes. We recommend to exclude genes with low expression prior uploading. Example data for genes and metabolites can be downloaded <a href="/publications/supp_materials/GAM/"
-    >here</a
-    >.</p
-  ><p
-  >After files are uploaded, a file summary is displayed. Verify that the files were parsed correctly.</p
-  ><div class="figure"
-  ><img src="img/data_summary.png" alt="Summary of the example data"
-     /><p class="caption"
-    >Summary of the example data</p
-    ></div
-  ><p
-  >If gene DE data was uploaded, the gene DE data is converted to reaction DE data. This is done by considering for a reaction all the genes that code any enzyme that takes part in this reaction. P-values of these genes are compared. Gene with the minimal p-value is selected and its p-value is assigned as the reaction p-value. All reactions without p-values are discarded as having no expressed enzymes. We recommend to exclude genes with low expression prior uploading.</p
-  ><p
-  >Reactions in the network can be interpreted as either edges or nodes. Select one of the interpretations.</p
-  ><p
-  ><strong
-    >Reactions as edges.</strong
-    > If reactions are interpreted as edges, if a pair of metabolites has multiple reaction connections between them, only the reaction with the minimal p-value is kept. All the remaining reactions and metabolites that take part in these reactions are combined into a network as edges and nodes respectively. To only consider cross-connections between substrates and products in reactions that make up a KEGG reaction pair (RPAIR) as opposed to all cross-connections, select the <em
-    >Use RPAIRs</em
-    > option (see <a href="http://www.genome.jp/kegg/reaction/"
-    >KEGG REACTION</a
-    > for details).</p
-  ><p
-  ><strong
-    >Reactions as nodes.</strong
-    > If reactions are interpreted as nodes, then both metabolites and reactions are added as nodes to the network. Edges are added between a metabolite and a reaction if the metabolite takes part in this reaction. To collapse groups of reactions that have at least one common metabolite and the same most significant gene into single nodes, select the <em
-    >Collapse reactions</em
-    > option.</p
-  ><p
-  >Generally, all of these options will lead to similar results. We recommend to use the default option values as this makes the network simpler and the analysis faster.</p
-  ></div
-><div id="finding-a-module"
-><h4
-  >Finding a module</h4
-  ><p
-  >After making a network, you can find a connected module that contains the most significantly changed genes and reactions. Internally, this is done by first scoring nodes and edges based on their p-values such that positive scores correspond to significant p-values and negative scores correspond to insignificant changes. Then the problem of finding a connected subgraph with maximum summary weight (maximum-weight connected subgraph, MWCS problem) is solved.</p
-  ><p
-  >This site supports three solvers:</p
-  ><ul
-  ><li
-    >The <a href="http://www.mi.fu-berlin.de/w/LiSA/Heinz"
-      >Heinz solver</a
-      >: it's the default solver, as it works for both interpretations of reactions.</li
-    ><li
-    >The MWCS solver: this solver can provide more interactive experience because when reaching time limit it outputs the best solution found so far.</li
-    ><li
-    >The heuristic search: this solver is from R-package BioNet. Added for comparison, as it's distributed freely.</li
-    ></ul
-  ><p
-  >As the last two solvers don't support edge scores they are not available when reactions are interpreted as edges.</p
-  ><p
-  >The <em
-    >FDR values</em
-    >, <em
-    >Score for absent metabolites</em
-    >, and <em
-    >Score for absent reactions</em
-    > options control the size of the module. Increasing/decreasing the <em
-    >FDR for reactions</em
-    > (<em
-    >FDR for metabolites</em
-    >) value makes adding reactions (metabolites) to a module harder/easier. We recommend to start from the default values and then gradually change them depending on the results.</p
-  ><p
-  >Click &quot;Find module&quot; button to find a module in the network. The module will be shown on the right panel.</p
-  ><div class="figure"
-  ><img src="img/module.png" alt="Example of a module"
-     /><p class="caption"
-    >Example of a module</p
-    ></div
-  ></div
-><div id="graph-legend"
-><h4
-  >Graph legend</h4
-  ><p
-  >We use the following scheme:</p
-  ><ul
-  ><li
-    >Red nodes and edges are up-regulated.</li
-    ><li
-    >Green nodes and edges are down-regulated.</li
-    ><li
-    >Blue nodes and edges don't have <em
-      >log2FC</em
-      > values.</li
-    ><li
-    >Bigger size of nodes and width of edges means lower p-values.</li
-    ><li
-    >Dashed edges are trans-RPAIRs.</li
-    ></ul
-  ></div
-><div id="post-processing"
-><h4
-  >Post-processing</h4
-  ><p
-  >There are couple of post-processing steps that are available. If in the network reactions are edges and RPAIRs are used, then trans-connections can be added. When reactions are nodes, the following operations can be applied:</p
-  ><ul
-  ><li
-    >Adding all metabolites that are part of any reaction in the module.</li
-    ><li
-    >Adding all reactions that aren't present in the module but are directly connected to two metabolites from the module.</li
-    ><li
-    >Removing all metabolites with no data and only one connection in the module.</li
-    ><li
-    >Replacing reaction nodes with edges for reactions that connect only two metabolites in the module and these two metabolites are on different sides of the reaction.</li
-    ></ul
-  ></div
-><div id="saving-the-module"
-><h4
-  >Saving the module</h4
-  ><p
-  >You can download the module in an XGMML format by clicking the <em
-    >Download XGMML</em
-    > button. This file can be imported into Cytoscape. You can also download GAM's VizMap style for Cytoscape <a href="/publications/supp_materials/GAM/GAM_VizMap.xml"
-    >here</a
-    >.</p
-  ></div
->
+                                  <p>This application is a web-interface to the <a href="bioconductor/GAM"
+target="_blank">GAM</a> (Gene And Metabolic data analysis) R-package. GAM analyzes gene and/or metabolic differential expression (DE) data in a context of biochemical reactions.</p>
+<p>Analysis consists of creating a network describing connections between metabolites and reactions specific to the data and finding a connected module that contains the most significant changes.</p>
+<h4 id="constructing-a-network">Constructing a network</h4>
+<p>To construct a network select an organism from the <em>Select an organism</em> dropdown menu. Only reactions possible in the selected organism are used. Currently supported organisms are Homo sapiens and Mus musculus. If your organism is not supported, please contact <a
+href="mailto:asergushichev@path.wustl.edu">asergushichev@path.wustl.edu</a>.</p>
+<!-- :ToDo: add a screenshot? -->
+
+<p>The next step is to upload gene and/or metabolite DE data. GAM can be run using either gene DE data or metabolite DE data or both datasets. Each DE dataset must be in a separate CSV file (comma-, tab- and space- separated files are supported, archived files are supported too). The first line of each file must contain a header with column names. Files should contain the following columns:</p>
+<ul>
+<li>&quot;ID&quot;: RefSeq mRNA transcript ID, Entrez ID or symbol for genes and and HMDB or KEGG ID for metbolites.</li>
+<li>&quot;pval&quot; for the p-value;</li>
+<li>&quot;log2FC&quot; for the base 2 logarithm of the fold-change.</li>
+</ul>
+<p><strong>NB: Columns in your files can have a little different names and GAM will try to guess which one to use.</strong> If you favorite DE tool produce names that GAM can not recoginze, please tell me and I will try to add it.</p>
+<p>The &quot;log2FC&quot; column is optional, but we recommend to provide it if possible, as it's used for colors in graph visualizing. Any other columns will be copied to a network as node or edge attributes. Example data for genes and metabolites can be downloaded <a href="/publications/supp_materials/GAM/">here</a>.</p>
+<p>After files are uploaded, a file summary is displayed. Verify that the files were parsed correctly.</p>
+<div class="figure">
+<img src="img/data_summary.png" alt="Summary of the example data" /><p class="caption">Summary of the example data</p>
+</div>
+<p>If gene DE data was uploaded, the gene DE data is converted to reaction DE data. This is done by considering for a reaction all the genes that code any enzyme that takes part in this reaction. P-values of these genes are compared. Gene with the minimal p-value is selected and its p-value is assigned as the reaction p-value. All reactions without p-values are discarded as having no expressed enzymes. We recommend to exclude genes with low expression prior uploading.</p>
+<p>Reactions in the network can be interpreted as either edges or nodes. Select one of the interpretations.</p>
+<p><strong>Reactions as edges.</strong> If reactions are interpreted as edges, if a pair of metabolites has multiple reaction connections between them, only the reaction with the minimal p-value is kept. All the remaining reactions and metabolites that take part in these reactions are combined into a network as edges and nodes respectively. To only consider cross-connections between substrates and products in reactions that make up a KEGG reaction pair (RPAIR) as opposed to all cross-connections, select the <em>Use RPAIRs</em> option (see <a href="http://www.genome.jp/kegg/reaction/">KEGG REACTION</a> for details).</p>
+<p><strong>Reactions as nodes.</strong> If reactions are interpreted as nodes, then both metabolites and reactions are added as nodes to the network. Edges are added between a metabolite and a reaction if the metabolite takes part in this reaction. To collapse groups of reactions that have at least one common metabolite and the same most significant gene into single nodes, select the <em>Collapse reactions</em> option.</p>
+<p>Generally, all of these options will lead to similar results. We recommend to use the default option values as this makes the network simpler and the analysis faster.</p>
+<h4 id="finding-a-module">Finding a module</h4>
+<p>After making a network, you can find a connected module that contains the most significantly changed genes and reactions. Internally, this is done by first scoring nodes and edges based on their p-values such that positive scores correspond to significant p-values and negative scores correspond to insignificant changes. Then the problem of finding a connected subgraph with maximum summary weight (maximum-weight connected subgraph, MWCS problem) is solved.</p>
+<p>This site supports three solvers:</p>
+<ul>
+<li>The <a href="http://www.mi.fu-berlin.de/w/LiSA/Heinz">Heinz solver</a>: it's the default solver, as it works for both interpretations of reactions.</li>
+<li>The MWCS solver: this solver can provide more interactive experience because when reaching time limit it outputs the best solution found so far.</li>
+<li>The heuristic search: this solver is from R-package BioNet. Added for comparison, as it's distributed freely.</li>
+</ul>
+<p>As the last two solvers don't support edge scores they are not available when reactions are interpreted as edges.</p>
+<p>The <em>FDR values</em>, <em>Score for absent metabolites</em>, and <em>Score for absent reactions</em> options control the size of the module. Increasing/decreasing the <em>FDR for reactions</em> (<em>FDR for metabolites</em>) value makes adding reactions (metabolites) to a module harder/easier. We recommend to start from the default values and then gradually change them depending on the results.</p>
+<p>Click &quot;Find module&quot; button to find a module in the network. The module will be shown on the right panel.</p>
+<div class="figure">
+<img src="img/module.png" alt="Example of a module" /><p class="caption">Example of a module</p>
+</div>
+<h4 id="graph-legend">Graph legend</h4>
+<p>We use the following scheme:</p>
+<ul>
+<li>Red nodes and edges are up-regulated.</li>
+<li>Green nodes and edges are down-regulated.</li>
+<li>Blue nodes and edges don't have <em>log2FC</em> values.</li>
+<li>Bigger size of nodes and width of edges means lower p-values.</li>
+<li>Dashed edges are trans-RPAIRs.</li>
+</ul>
+<h4 id="post-processing">Post-processing</h4>
+<p>There are couple of post-processing steps that are available. If in the network reactions are edges and RPAIRs are used, then trans-connections can be added. When reactions are nodes, the following operations can be applied:</p>
+<ul>
+<li>Adding all metabolites that are part of any reaction in the module.</li>
+<li>Adding all reactions that aren't present in the module but are directly connected to two metabolites from the module.</li>
+<li>Removing all metabolites with no data and only one connection in the module.</li>
+<li>Replacing reaction nodes with edges for reactions that connect only two metabolites in the module and these two metabolites are on different sides of the reaction.</li>
+</ul>
+<h4 id="saving-the-module">Saving the module</h4>
+<p>You can download the module in an XGMML format by clicking the <em>Download XGMML</em> button. This file can be imported into Cytoscape. You can also download GAM's VizMap style for Cytoscape <a href="/publications/supp_materials/GAM/GAM_VizMap.xml">here</a>.</p>
 
                               </div>
                           </div>

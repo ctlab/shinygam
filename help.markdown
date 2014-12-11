@@ -21,18 +21,22 @@ href="mailto:asergushichev@path.wustl.edu">asergushichev@path.wustl.edu</a>.
 
 The next step is to upload gene and/or metabolite DE data. GAM can be run using
 either gene DE data or metabolite DE data or both datasets. Each DE dataset
-must be in a separate tab-delimited file. The first line of each file must
-contain a header with column names. The columns of each file are:
+must be in a separate CSV file (comma-, tab- and space- separated files are 
+supported, archived files are supported too). The first line of each file must
+contain a header with column names. Files should contain the following columns:
 
-* "ID" for the RefSeq mRNA transcript ID or Entrez ID (for the gene DE file)
-  and the HMDB or KEGG ID (for the metabolite DE file);
+* "ID": RefSeq mRNA transcript ID, Entrez ID or symbol for genes and
+  and HMDB or KEGG ID for metbolites.
 * "pval" for the p-value;
 * "log2FC" for the base 2 logarithm of the fold-change.
 
-The last column is optional, but we recommend to provide it if possible, as it's
+**NB: Columns in your files can have a little different names and GAM will try
+to guess which one to use.** If you favorite DE tool produce names that GAM
+can not recoginze, please tell me and I will try to add it.
+
+The "log2FC" column is optional, but we recommend to provide it if possible, as it's
 used for colors in graph visualizing. Any other columns will be copied to a
-network as node or edge attributes.  We recommend to exclude genes with low
-expression prior uploading. Example data for genes and metabolites can be
+network as node or edge attributes.  Example data for genes and metabolites can be
 downloaded [here](/publications/supp_materials/GAM/).
 
 After files are uploaded, a file summary is displayed. Verify that the files

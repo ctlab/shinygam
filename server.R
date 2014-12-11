@@ -15,11 +15,12 @@ networks <- list(
 heinz.py <- "/usr/local/lib/heinz/heinz.py"
 mwcs.path <- "/usr/local/bin/mwcs"
 
-read.table.smart <- function(path) {
+read.table.smart <- function(path, ...) {
+    fields <- list(...)    
     conn <- file(path)
     header <- readLines(conn, n=1)
     close(conn)
-
+    
     sep <- "\t"
     for (s in c("\t", " ", ",")) {
         if (grepl(s, header)) {
@@ -27,8 +28,44 @@ read.table.smart <- function(path) {
             break
         } 
     }
+    
+    res <- as.data.table(read.table(path, sep=sep, header=T, stringsAsFactors=F))
+    
+    oldnames <- character(0)
+    newnames <- character(0)
+    
+    for (field in names(fields)) {        
+        if (field %in% colnames(res)) {
+            next
+        }
+        
+        z <- na.omit(
+            match(
+                tolower(c(field, fields[[field]])),
+                tolower(colnames(res))))
+        if (length(z) == 0) {
+            next
+        }
+        
+        oldnames <- c(oldnames, colnames(res)[z])
+        newnames <- c(newnames, field)
+    }
+        
+    setnames(res, oldnames, newnames)
+    res
+}
 
-    read.table(path, sep=sep, header=T, stringsAsFactors=F)
+read.table.smart.de <- function(path, ID=ID) {
+    read.table.smart(path, ID=ID, pval=c("p.value", "pvalue"), log2FC=c("log2foldchange", "logfc"))
+}
+
+
+read.table.smart.de.gene <- function(path) {
+    read.table.smart.de(path, ID=c("gene", "entrez", "symbol", ""))
+}
+
+read.table.smart.de.met <- function(path) {
+    read.table.smart.de(path, ID=c("metabolite", "kegg", "hmdb", ""))
 }
 
 renderGraph <- function(expr, env=parent.frame(), quoted=FALSE) {
@@ -123,7 +160,7 @@ shinyServer(function(input, output, session) {
             return(NULL)
         }
         
-        res <- data.table(read.table.smart(input$geneDE$datapath))
+        res <- read.table.smart.de.gene(input$geneDE$datapath)
         if (!all(necessary.de.fields %in% names(res))) {
             stop(paste0("Genomic differential expression data should contain at least these fields: ", 
                         paste(necessary.de.fields, collapse=", ")))
@@ -178,7 +215,7 @@ shinyServer(function(input, output, session) {
             return(NULL)
         }
         
-        res <- data.table(read.table.smart(input$metDE$datapath))
+        res <- read.table.smart.de.met(input$metDE$datapath)
         if (!all(necessary.de.fields %in% names(res))) {
             stop(paste0("Metabolic differential expression data should contain at least these fields: ", 
                         paste(necessary.de.fields, collapse=", ")))
