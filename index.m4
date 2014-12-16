@@ -69,7 +69,7 @@
                       -->
                       <div class="tab-pane active" id="tab-work">
                           <div class="row">
-                              <div class="span9">
+                              <div class="span12">
                                   <div class="alert alert-info" role="alert">If you have any feedback, please send it to <a href="mailto:asergushichev@path.wustl.edu">asergushichev@path.wustl.edu</a></div>
                               </div>
                           </div>
@@ -141,17 +141,15 @@
                                   </form>
                               </div>
                               <div class="span9">
-                                  <div class="row">
-                                      <div class="span4">
-                                          <h3>Genomic data</h3>
-                                          <div id="geneDESummary" class="shiny-html-output"></div>
-                                          <div id="geneDETable" class="shiny-html-output"></div>
-                                      </div>
-                                      <div class="span4">
-                                          <h3>Metabolic data</h3>
-                                          <div id="metDESummary" class="shiny-html-output"></div>
-                                          <div id="metDETable" class="shiny-html-output"></div>
-                                      </div>
+                                  <div>
+                                      <h3>Genomic data</h3>
+                                      <div id="geneDESummary" class="shiny-html-output"></div>
+                                      <div id="geneDETable" class="shiny-html-output"></div>
+                                  </div>
+                                  <div>
+                                      <h3>Metabolic data</h3>
+                                      <div id="metDESummary" class="shiny-html-output"></div>
+                                      <div id="metDETable" class="shiny-html-output"></div>
                                   </div>
                                   <div class="bottom-buffer">
                                       <h3>Network summary</h3>
@@ -293,6 +291,11 @@
                                   </div>
                               </div>
                               <div class="span9">
+                                  <div id="legend">
+                                      <div style="color: red">Red: log2FC &gt; 0</div>
+                                      <div style="color: green">Green: log2FC &lt; 0</div>
+                                      <div style="color: #00acad">Aqua: log2FC not availavle</div>
+                                  </div>
                                   <div id="module" class="graph-output"></div>
                               </div>
                           </div>
