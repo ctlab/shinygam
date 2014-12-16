@@ -29,7 +29,7 @@ read.table.smart <- function(path, ...) {
         } 
     }
     
-    res <- as.data.table(read.table(path, sep=sep, header=T, stringsAsFactors=F))
+    res <- as.data.table(read.table(path, sep=sep, header=T, stringsAsFactors=F, check.names=F))
     
     oldnames <- character(0)
     newnames <- character(0)
