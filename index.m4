@@ -111,6 +111,8 @@
                                               <i class="icon-question-sign"></i>
                                           </a>
                                       </label>
+                                      <div id="reactionsAs" class="shiny-html-output"></div>
+                                      <!--
                                       <select id="reactionsAs">
                                           <option value="edges" selected="selected">As edges</option>
                                           <option value="nodes">As nodes</option>
@@ -137,6 +139,7 @@
                                               </span>
                                           </label>
                                       </div>
+                                      -->
                                       <button id="preprocess" type="button" class="btn action-button">Make network</button>
                                   </form>
                               </div>

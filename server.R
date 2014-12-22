@@ -261,6 +261,22 @@ shinyServer(function(input, output, session) {
         }
         format(as.data.frame(head(data[order(pval)])), digits=3)
     })
+
+    reactionsAs <- reactive({
+        gene.de <- geneDEInput()
+
+        met.de <- metDEInput()
+
+        if (!is.null(gene.de) && !is.null(met.de)) {
+            return("edges")
+        }
+
+        return("nodes")
+    })
+
+    output$reactionsAs <- renderText({
+        reactionsAs()
+    })
     
     esInput <- reactive({
         input$preprocess
@@ -286,9 +302,11 @@ shinyServer(function(input, output, session) {
                 met.de <- met.de[which(met.de$pval < 1),]
             }
             
-            reactions.as.edges = isolate(input$reactionsAs) == "edges"
-            collapse.reactions = isolate(input$collapseReactions)
-            use.rpairs = isolate(input$useRpairs)
+            reactions.as.edges = isolate(reactionsAs()) == "edges"
+            #collapse.reactions = isolate(input$collapseReactions)
+            #use.rpairs = isolate(input$useRpairs)
+            collapse.reactions = TRUE
+            use.rpairs = TRUE
             
             es <- makeExperimentSet(
                 network=network,
