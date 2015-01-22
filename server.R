@@ -279,19 +279,24 @@ shinyServer(function(input, output, session) {
         }
         format(as.data.frame(head(data[order(pval)])), digits=3)
     })
-
-    output$reactionsAsHolder <- renderUI({
-        gene.de <- geneDEInput()
-
-        met.de <- metDEInput()
-
-        selected <- if (!is.null(met.de)) "edges" else "nodes"
-
-        selectInput("reactionsAs", 
-                    label="Interpret reactions as",
-                      c("edges"="edges", "nodes"="nodes"),
-                      selected=selected)
+    
+    output$updateEsParameters <- renderJs({        
+        selected <- if (!is.null(metDEInput())) "edges" else "nodes"
+        return(sprintf("$('#reactionsAs')[0].selectize.setValue('%s')", selected))
     })
+# 
+#     output$reactionsAsHolder <- renderUI({
+#         gene.de <- geneDEInput()
+# 
+#         met.de <- metDEInput()
+# 
+#         selected <- if (!is.null(met.de)) "edges" else "nodes"
+# 
+#         selectInput("reactionsAs", 
+#                     label="Interpret reactions as",
+#                       c("edges"="edges", "nodes"="nodes"),
+#                       selected=selected)
+#     })
 
 
     esInput <- reactive({
@@ -355,7 +360,8 @@ shinyServer(function(input, output, session) {
             es <- esInput()
         }, error=function(e) {})
         
-        paste0(
+        
+        res <- paste0(
             makeJsAssignments(
                 network.available = !is.null(es),
                 network.hasReactionsAsNodes = !is.null(es) && !es$reactions.as.edges,
@@ -366,6 +372,24 @@ shinyServer(function(input, output, session) {
             ),
             "showFastHeinzAndMWCS(network.hasReactionsAsNodes);"
         )
+        
+        num.positive = 150
+        if (!is.null(es$fb.met)) {
+            fb <- es$fb.met
+            pvals <- with(es$met.de.ext, { x <- pval; names(x) <- ID; na.omit(x) })            
+            recMetFDR <- GAM:::recommendedFDR(fb, pvals, num.positive=num.positive)
+            recAbsentMetScore <- GAM:::scoreValue(fb, 1, recMetFDR)
+            res <- paste0(res, sprintf('$("#metLogFDR").val(%.1f).trigger("change");', log10(recMetFDR)))
+            res <- paste0(res, sprintf('$("#absentMetScore").val(%.1f).trigger("change");', recAbsentMetScore))
+        }
+        
+        if (!is.null(es$fb.rxn)) {
+            fb <- es$fb.rxn
+            pvals <- with(es$rxn.de.ext, { x <- pval; names(x) <- ID; na.omit(x) })            
+            recRxnFDR <- GAM:::recommendedFDR(fb, pvals, num.positive=num.positive)
+            res <- paste0(res, sprintf('$("#geneLogFDR").val(%.1f).trigger("change");', log10(recRxnFDR)))
+        }
+        res
     })
     
     output$showModulePanel <- renderJs({

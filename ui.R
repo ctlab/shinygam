@@ -21,7 +21,11 @@ workPanel <- tagList(
                 ),
             fileInput("geneDE", "File with gene DE data"),
             fileInput("metDE", "File with metabolic DE data"),
-            uiOutput("reactionsAsHolder"),
+            #uiOutput("reactionsAsHolder"),
+            selectInput("reactionsAs", 
+                        label="Interpret reactions as",
+                        c("edges"="edges", "nodes"="nodes"),
+                        selected="nodes"),
             conditionalPanel("input.reactionsAs == 'nodes'",
                 checkboxInput(
                     "collapseReactions",
@@ -129,6 +133,7 @@ shinyUI(
         ),
 
     includeHTML("misc.xhtml"),
+    div(id="updateEsParameters", class="js-output"),
 
     titlePanel("Shiny GAM: integrated analysis of genes and metabolites"),
 
@@ -137,7 +142,7 @@ shinyUI(
         tabsetPanel(
             tabPanel("Work", workPanel),
             tabPanel("Help", helpPanel),
-            tabPanel("About", aboutPanel) 
+            tabPanel("About", aboutPanel)
             )
         ))
 ))
