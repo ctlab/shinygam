@@ -14,8 +14,7 @@ that contains the most significant changes.
 To construct a network select an organism from the *Select an organism*
 dropdown menu.  Only reactions possible in the selected organism are used.
 Currently supported organisms are Homo sapiens and Mus musculus. If your
-organism is not supported, please contact <a
-href="mailto:asergushichev@path.wustl.edu">asergushichev@path.wustl.edu</a>.
+organism is not supported, please contact Alexey Sergushichev at asergushichev@path.wustl.edu.
 
 <!-- :ToDo: add a screenshot? -->
 
@@ -61,8 +60,8 @@ with the minimal p-value is kept. All the remaining reactions and metabolites
 that take part in these reactions are combined into a network as edges and
 nodes respectively. To only consider cross-connections between substrates and
 products in reactions that make up a KEGG reaction pair (RPAIR) as opposed to
-all cross-connections, select the *Use RPAIRs* option (see [KEGG
-REACTION](http://www.genome.jp/kegg/reaction/) for details).
+all cross-connections, select the *Use RPAIRs* option, see [KEGG
+REACTION](http://www.genome.jp/kegg/reaction/) for details.
 
 **Reactions as nodes.** If reactions are interpreted as nodes, then both
 metabolites and reactions are added as nodes to the network. Edges are added
@@ -137,5 +136,5 @@ When reactions are nodes, the following operations can be applied:
 
 You can download the module in an XGMML format by clicking the *Download XGMML*
 button. This file can be imported into Cytoscape. You can also download GAM's
-VizMap style for Cytoscape
-<a id="downloadVizMap" class="shiny-download-link" href="" target="_blank">here</a> 
+VizMap style for Cytoscape 
+<a id="downloadVizMap" class="shiny-download-link" href="" target="_blank">here</a>.
