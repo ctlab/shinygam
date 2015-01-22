@@ -107,6 +107,7 @@ if (typeof String.prototype.startsWith != 'function') {
   };
 }
 
+/*
 homeTab = "work"
 
 $(document).ready(function() {
@@ -141,6 +142,7 @@ $(window).on("popstate", function() {
 
     }
 })
+*/
 
 window.onload = function() {
 
@@ -156,6 +158,7 @@ window.onload = function() {
         placement: "right",
         delay: { show: 0, hide: 0 }
     });
+    /*
     $("#metMinusLogFDR").slider({
         from: 0,
         to: 12 * 4,
@@ -188,6 +191,7 @@ window.onload = function() {
         },
         smooth: false
     });
+    */
 
 }
 

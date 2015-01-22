@@ -2,18 +2,21 @@ library(shiny)
 library(data.table)
 library(igraph)
 library(GAM)
-
+library(GAM.db)
+library(GAM.networks)
 
 options(shiny.error=traceback)
-load("./data/kegg.human.network.rda")
-load("./data/kegg.mouse.network.rda")
+
+data("met.id.map")
+data("kegg.human.network")
+data("kegg.mouse.network")
 
 networks <- list(
-    "Mouse musculus"=kegg.mouse.network,
-    "Homo sapiens"=kegg.human.network)
+    "mmu"=kegg.mouse.network,
+    "hsa"=kegg.human.network)
 
 heinz.py <- "/usr/local/lib/heinz/heinz.py"
-mwcs.path <- "/usr/local/bin/mwcs"
+heinz2 <- "/usr/local/lib/heinz2/heinz"
 
 read.table.smart <- function(path, ...) {
     fields <- list(...)    
@@ -143,7 +146,21 @@ makeJsAssignments  <- function(...) {
     paste0(names(values), " = ", values, ";\n", collapse="")
 }
 
-# Define server logic required to generate and plot a random distribution
+# adapted from shiny
+simpleSelectInput <- function (inputId, choices, selected = NULL) 
+{
+    selectTag <- tags$select(id = inputId)
+    optionTags <- mapply(choices, names(choices), SIMPLIFY = FALSE, 
+        USE.NAMES = FALSE, FUN = function(choice, name) {
+            optionTag <- tags$option(value = choice, name)
+            if (choice %in% selected) 
+                optionTag$attribs$selected = "selected"
+            optionTag
+        })
+    selectTag <- tagSetChildren(selectTag, list = optionTags)
+    selectTag
+}
+
 shinyServer(function(input, output, session) {
     
     longProcessStart <- function() {
@@ -153,6 +170,7 @@ shinyServer(function(input, output, session) {
     longProcessStop <- function() {
         session$sendCustomMessage(type='showWaitMessage', list(value=F))
     }
+
 
     geneDEInput <- reactive({
         if (is.null(input$geneDE)) {
@@ -262,22 +280,20 @@ shinyServer(function(input, output, session) {
         format(as.data.frame(head(data[order(pval)])), digits=3)
     })
 
-    reactionsAs <- reactive({
+    output$reactionsAsHolder <- renderUI({
         gene.de <- geneDEInput()
 
         met.de <- metDEInput()
 
-        if (!is.null(gene.de) && !is.null(met.de)) {
-            return("edges")
-        }
+        selected <- if (!is.null(met.de)) "edges" else "nodes"
 
-        return("nodes")
+        selectInput("reactionsAs", 
+                    label="Interpret reactions as",
+                      c("edges"="edges", "nodes"="nodes"),
+                      selected=selected)
     })
 
-    output$reactionsAs <- renderText({
-        reactionsAs()
-    })
-    
+
     esInput <- reactive({
         input$preprocess
         network <- networks[[isolate(input$network)]]
@@ -302,9 +318,9 @@ shinyServer(function(input, output, session) {
                 met.de <- met.de[which(met.de$pval < 1),]
             }
             
-            reactions.as.edges = isolate(reactionsAs()) == "edges"
-            #collapse.reactions = isolate(input$collapseReactions)
-            #use.rpairs = isolate(input$useRpairs)
+            reactions.as.edges = isolate(input$reactionsAs) == "edges"
+            collapse.reactions = isolate(input$collapseReactions)
+            use.rpairs = isolate(input$useRpairs)
             collapse.reactions = TRUE
             use.rpairs = TRUE
             
@@ -345,6 +361,7 @@ shinyServer(function(input, output, session) {
                 network.hasReactionsAsNodes = !is.null(es) && !es$reactions.as.edges,
                 network.hasReactionsAsEdges = !is.null(es) && es$reactions.as.edges,
                 network.hasGenes = !is.null(es$fb.rxn),
+                network.hasMets = !is.null(es$fb.met),
                 network.usesRpairs = !is.null(es) && es$use.rpairs
             ),
             "showFastHeinzAndMWCS(network.hasReactionsAsNodes);"
@@ -357,13 +374,24 @@ shinyServer(function(input, output, session) {
         # return("mp = $('#module-panel'); mp.hide();")
         return("")
     })
+
+
+    metFDR <- reactive({
+        10^input$metLogFDR
+    })
+
+    geneFDR <- reactive({
+        10^input$geneLogFDR
+    })
+
     
     rawModuleInput <- reactive({
         input$find
-        met.fdr <- isolate(input$metFDR)
-        gene.fdr <- isolate(input$geneFDR)
+        met.fdr <- isolate(metFDR())
+        gene.fdr <- isolate(geneFDR())
         absent.met.score <- isolate(input$absentMetScore)
-        absent.rxn.score <- isolate(input$absentRxnScore)
+        #absent.rxn.score <- isolate(input$absentRxnScore)
+        #absent.rxn.score <- 0
         
         es <- isolate(esInput())
         
@@ -372,24 +400,30 @@ shinyServer(function(input, output, session) {
         }
 
         solverName <- isolate(input$solver)
-        if (solverName == "mwcs") {
-            solver <- mwcs.solver(mwcs.path, timeLimit=min(isolate(input$mwcsTimeLimit), 120))
+        if (solverName == "heinz2") {
+            solver <- heinz2.solver(
+                heinz2,
+                timeLimit=30)
+                #timeLimit=min(isolate(input$mwcsTimeLimit), 120))
         } else if (solverName == "heinz") {
-            solver <- heinz.solver(heinz.py, timeLimit=min(isolate(input$heinzTimeLimit), 240))
-        } else if (solverName == "fastHeinz") {
-            solver <- fastHeinz.solver
+            solver <- heinz.solver(
+                heinz.py, 
+                timeLimit=60)
+                #timeLimit=min(isolate(input$heinzTimeLimit), 240))
+        } else if (solverName == "randHeur") {
+            set.seed(42)
+            solver <- randHeur.solver(4)
         } else {
             stop(paste("There is no solver called", solverName))
         }
-        solver
 
         longProcessStart()
         tryCatch({
             res <- findModule(es,
                         met.fdr=met.fdr,
-                        gene.fdr=gene.fdr,
+                        rxn.fdr=gene.fdr,
                         absent.met.score=absent.met.score,
-                        absent.rxn.score=absent.rxn.score,
+                        #absent.rxn.score=absent.rxn.score,
                         solver=solver)
             
             if (is.null(res) || length(V(res)) == 0) {
@@ -399,8 +433,9 @@ shinyServer(function(input, output, session) {
                                              if (es$reactions.as.edges) ".re" else ".rn",
                                              ".mf=", format(met.fdr, scientific=T),
                                              ".rf=", format(gene.fdr, scientific=T),
-                                             ".ams=", absent.met.score,
-                                             ".ars=", absent.rxn.score)
+                                             ".ams=", absent.met.score
+                                            #, ".ars=", absent.rxn.score
+                                             )
             res
         }, finally=longProcessStop())
     })
@@ -478,16 +513,24 @@ shinyServer(function(input, output, session) {
     output$downloadNetwork <- downloadHandler(
         filename = reactive({ paste0("network.", tolower(esInput()$network$organism), ".xgmml") }),
         content = function(file) {
-            saveModuleToXgmml(esInput()$subnet, "network", file)
+            saveModuleToXgmml(esInput()$subnet, file=file, name=tolower(esInput()$network$organism))
         })
     
-    output$downloadModule<- downloadHandler(
+    output$downloadModule <- downloadHandler(
         filename = reactive({ paste0("module", moduleInput()$description.string, ".xgmml") }),
         content = function(file) {
-            saveModuleToXgmml(moduleInput(), "module", file)
+            saveModuleToXgmml(moduleInput(), file=file, moduleInput()$description.string)
         })
     
     output$GAMVersion <- renderUI({
-        p(paste("GAM version:", sessionInfo()$otherPkgs$GAM$Version))
+        p(paste("GAM version:", sessionInfo()$otherPkgs$GAM$Revision))
     })
+
+    output$downloadVizMap <- downloadHandler(
+        filename = "GAM_VizMap.xml",
+        content = function(file) {
+            file.copy(
+                from=system.file("GAM_VizMap.xml", package="GAM"),
+                to=file)
+        })
 })

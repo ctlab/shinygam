@@ -5,18 +5,22 @@
     <script src="shared/jquery.js" type="text/javascript"></script>
     <script src="shared/shiny.js" type="text/javascript"></script>
     <link rel="stylesheet" type="text/css" href="shared/shiny.css"/>
+    <!--
     <link rel="stylesheet" type="text/css" href="shared/slider/css/jquery.slider.min.css"/>
     <script src="shared/slider/js/jquery.slider.min.js"></script>
+    -->
 
 
     <link rel="stylesheet" type="text/css" href="shared/bootstrap/css/bootstrap.min.css"/>
     <script src="shared/bootstrap/js/bootstrap.min.js"></script>
+    <!--
+    <link rel="stylesheet" type="text/css" href="shared/bootstrap/css/bootstrap-responsive.min.css"/>
+    -->
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <script src="d3.v3.min.js" charset="utf-8"></script>
     <script src="gam.js" type="text/javascript"></script>
     <link rel="stylesheet" type="text/css" href="gam.css"/>
-    <link rel="stylesheet" type="text/css" href="shared/bootstrap/css/bootstrap-responsive.min.css"/>
     <script> (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){ (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o), m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m) })(window,document,'script','//www.google-analytics.com/analytics.js','ga'); ga('create', 'UA-44771306-1', 'wustl.edu'); ga('send', 'pageview'); </script>
     <title>Shiny GAM</title>
   </head>
@@ -49,12 +53,12 @@
       </div>
     <div class="container">
       <div class="row">
-        <div class="span12" style="padding: 10px 0px;">
+        <div class="col-md-12" style="padding: 10px 0px;">
           <h1>Shiny GAM: integrated analysis of genes and metabolites</h1>
         </div>
       </div>
       <div class="row">
-          <div class="span12">
+          <div class="col-md-12">
               <div class="tabbable">
                   <ul class="nav nav-tabs" id="tab-panel-main">
                       <!--<li class="active"> <a href="#tab-home" data-toggle="tab">Home</a> </li>-->
@@ -69,19 +73,19 @@
                       -->
                       <div class="tab-pane active" id="tab-work">
                           <div class="row">
-                              <div class="span12">
+                              <div class="col-md-12">
                                   <div class="alert alert-info" role="alert">If you have any feedback, please send it to <a href="mailto:asergushichev@path.wustl.edu">asergushichev@path.wustl.edu</a></div>
                               </div>
                           </div>
                           <div class="row">
-                              <div class="span3">
+                              <div class="col-md-3">
                                   <form class="well">
                                       <p class="form-header">Construct a network</p>
                                       <label class="control-label" for="network">
                                           Select an organism: 
                                           <a id="select-organism-tooltip" class="help-tooltip" href="#" 
                                               title="Select an organism that you want to analyse. If there is no one that you want contact the author (see About tab).">
-                                              <i class="icon-question-sign"></i>
+                                              <span class="glyphicon glyphicon-question-sign"/>
                                           </a>
                                       </label>
                                       <select id="network" class="selectpicker">
@@ -92,7 +96,7 @@
                                           File with gene DE data: 
                                           <a id="upload-gene-data-tooltip" class="help-tooltip" href="#" 
                                               title='File with gene differential expression data shoud be tab-separated with header and contain columns "ID" and "pval".'>
-                                              <i class="icon-question-sign"></i>
+                                              <span class="glyphicon glyphicon-question-sign"/>
                                           </a>
                                       </label>
                                       <input id="geneDE" type="file"/>
@@ -100,7 +104,7 @@
                                           File with metabolic DE data: 
                                           <a id="upload-met-data-tooltip" class="help-tooltip" href="#" 
                                               title='File with metabolic differential expression data shoud be tab-separated with header and contain columns "ID" and "pval".'>
-                                              <i class="icon-question-sign"></i>
+                                              <span class="glyphicon glyphicon-question-sign"/>
                                           </a>
                                       </label>
                                       <input id="metDE" type="file"/>
@@ -108,42 +112,44 @@
                                           How to interpret reactions:
                                           <a id="reactionAs-tooltip" class="help-tooltip" href="#" 
                                               title='Reactions can be either edges connecting substrates with products or nodes connected to them. Reactions as edges makes analysis more flux-centric.'>
-                                              <i class="icon-question-sign"></i>
+                                              <span class="glyphicon glyphicon-question-sign"/>
                                           </a>
                                       </label>
-                                      <div id="reactionsAs" class="shiny-html-output"></div>
+                                      <div id="reactionsAsHolder" class="shiny-html-output"></div>
                                       <!--
                                       <select id="reactionsAs">
                                           <option value="edges" selected="selected">As edges</option>
                                           <option value="nodes">As nodes</option>
                                       </select>
-                                      <div data-display-if="input.reactionsAs == 'nodes'">
-                                          <label class="checkbox" for="collapseReactions">
+                                      -->
+                                      <div class="form-group shiny-input-container" data-display-if="input.reactionsAs == 'nodes'">
+                                        <div class="checkbox">
+                                          <label for="collapseReactions">
                                               <input id="collapseReactions" type="checkbox" checked="checked"/>
                                               <span>Collapse reactions
                                                   <a id="collapseReactions-tooltip" class="help-tooltip" href="#" 
                                                       title='Collapse reaction nodes with the same enzyme.'>
-                                                      <i class="icon-question-sign"></i>
+                                                      <span class="glyphicon glyphicon-question-sign"/>
                                                   </a>
                                               </span>
                                           </label>
+                                          </div>
                                       </div>
                                       <div data-display-if="input.reactionsAs != 'nodes'">
                                           <label class="checkbox" for="useRpairs">
-                                              <input id="useRpairs" type="checkbox" checked="checked"/>
                                               <span>Use RPAIRs
                                                   <a id="useRpairs-tooltip" class="help-tooltip" href="#" 
                                                       title='Connect only those substrate-product pairs that make up a KEGG RPAIR.'>
-                                                      <i class="icon-question-sign"></i>
+                                                      <span class="glyphicon glyphicon-question-sign"/>
                                                   </a>
                                               </span>
                                           </label>
+                                          <input id="useRpairs" type="checkbox" checked="checked"/>
                                       </div>
-                                      -->
                                       <button id="preprocess" type="button" class="btn action-button">Make network</button>
                                   </form>
                               </div>
-                              <div class="span9">
+                              <div class="col-md-9">
                                   <div>
                                       <h3>Genomic data</h3>
                                       <div id="geneDESummary" class="shiny-html-output"></div>
@@ -164,14 +170,14 @@
                               </div>
                           </div>
                           <div id="module-panel" class="row top-buffer">
-                              <div class="span3">
+                              <div class="col-md-3">
                                   <form class="well">
                                       <p class="form-header">Discover modules</p>
                                       <div data-display-if="network.hasGenes">
                                           <label for="geneFDR">FDR for reactions
                                               <a id="geneFDR-tooltip" class="help-tooltip" href="#" 
                                                   title='Increasing/decreasing this value makes adding reactions to a module harder/easier.'>
-                                                  <i class="icon-question-sign"></i>
+                                                  <span class="glyphicon glyphicon-question-sign"/>
                                               </a>
                                           </label>
                                           <input id="geneFDR" type="number" value="1e-06" min="1e-100" max="1" step="1e-200"/>
@@ -180,7 +186,7 @@
                                       <label for="metFDR">FDR for metabolites
                                           <a id="metFDR-tooltip" class="help-tooltip" href="#" 
                                               title='Increasing/decreasing this value makes adding metabolites to a module harder/easier.'>
-                                              <i class="icon-question-sign"></i>
+                                              <span class="glyphicon glyphicon-question-sign"/>
                                           </a>
                                       </label>
                                       <input id="metFDR" type="number" value="1e-06" min="1e-100" max="1" step="1e-200"/>
@@ -189,7 +195,7 @@
                                       <label for="absentMetScore">Score for absent metabolites
                                           <a id="absentMetScore-tooltip" class="help-tooltip" href="#" 
                                               title='Increasing/decreasing this value makes adding metabolites with no data to a module harder/easier.'>
-                                              <i class="icon-question-sign"></i>
+                                              <span class="glyphicon glyphicon-question-sign"/>
                                           </a>
                                       </label>
                                       <input id="absentMetScore" type="number" value="-20"/>
@@ -198,7 +204,7 @@
                                           <label for="absentRxnScore">Score for absent reactions
                                               <a id="absentRxnScore-tooltip" class="help-tooltip" href="#" 
                                                   title='Increasing/decreasing this value makes adding reactions with no data to a module harder/easier (usable only when there is no gene expression data).'>
-                                                  <i class="icon-question-sign"></i>
+                                                  <span class="glyphicon glyphicon-question-sign"/>
                                               </a>
                                           </label>
                                           <input id="absentRxnScore" type="number" value="-10"/>
@@ -207,7 +213,7 @@
                                       <label class="control-label" for="solver">Select a solver:
                                           <a id="selectSolver-tooltip" class="help-tooltip" href="#" 
                                               title='Multiple MWCS solvers can be used to find modules. Check the help page for details.'>
-                                              <i class="icon-question-sign"></i>
+                                              <span class="glyphicon glyphicon-question-sign"/>
                                           </a>
                                       </label>
 
@@ -221,7 +227,7 @@
                                           <label for="mwcsTimeLimit">MWCS solver time limit (seconds):
                                           <a id="selectSolver-tooltip" class="help-tooltip" href="#" 
                                               title="It's an approximate maximum time MWCS solver is allowed to run. After hitting the time limit it will print the best solurion found so far.">
-                                              <i class="icon-question-sign"></i>
+                                              <span class="glyphicon glyphicon-question-sign"/>
                                           </a>
                                       </label>
                                           <input id="mwcsTimeLimit" type="number" value="10" min="0" max="120"/>
@@ -231,7 +237,7 @@
                                           <label for="heinzTimeLimit">Heinz time limit (seconds):
                                           <a id="selectSolver-tooltip" class="help-tooltip" href="#" 
                                               title="It's an approximate maximum time heinz solver is allowed to run. After hitting the time limit it will just stop searching outputing no module.">
-                                              <i class="icon-question-sign"></i>
+                                              <span class="glyphicon glyphicon-question-sign"/>
                                           </a>
                                       </label>
                                           <input id="heinzTimeLimit" type="number" value="60" min="0" max="240"/>
@@ -243,7 +249,7 @@
                                               <span>Add trans- edges
                                                   <a id="addTransPairs-tooltip" class="help-tooltip" href="#" 
                                                       title='Add trans- RPAIR edges.'>
-                                                      <i class="icon-question-sign"></i>
+                                                      <span class="glyphicon glyphicon-question-sign"/>
                                                   </a>
                                               </span>
                                           </label>
@@ -254,7 +260,7 @@
                                               <span>Add all metabolites for reactions
                                                   <a id="addMetabolitesForReactions-tooltip" class="help-tooltip" href="#" 
                                                       title='Add all metabolites that are part of any reaction in the module.'>
-                                                      <i class="icon-question-sign"></i>
+                                                      <span class="glyphicon glyphicon-question-sign"/>
                                                   </a>
                                               </span>
                                           </label>
@@ -263,7 +269,7 @@
                                               <span>Add interconnections
                                                   <a id="addInterconnections-tooltip" class="help-tooltip" href="#" 
                                                       title="Addg all reactions that aren't present in the module but are directly connected to two metabolites from the module.">
-                                                      <i class="icon-question-sign"></i>
+                                                      <span class="glyphicon glyphicon-question-sign"/>
                                                   </a>
                                               </span>
                                           </label>
@@ -272,7 +278,7 @@
                                               <span>Remove hanging nodes
                                                   <a id="removeHangingNodes-tooltip" class="help-tooltip" href="#" 
                                                       title='Remove all metabolites with no data and only one connection in the module.'>
-                                                      <i class="icon-question-sign"></i>
+                                                      <span class="glyphicon glyphicon-question-sign"/>
                                                   </a>
                                               </span>
                                           </label>
@@ -281,7 +287,7 @@
                                               <span>Simplify reaction nodes
                                                   <a id="simplifyReactionNodes-tooltip" class="help-tooltip" href="#" 
                                                       title='Replacing reaction nodes with edges for reactions that connect only two metabolites in the module and these two metabolites are on different sides of the reaction.'>
-                                                      <i class="icon-question-sign"></i>
+                                                      <span class="glyphicon glyphicon-question-sign"/>
                                                   </a>
                                               </span>
                                           </label>
@@ -293,7 +299,7 @@
                                       <a id="downloadModule" class="btn shiny-download-link" href="" target="_blank">Download XGMML</a>
                                   </div>
                               </div>
-                              <div class="span9">
+                              <div class="col-md-9">
                                   <div id="legend">
                                       <div style="color: red">Red: log2FC &gt; 0</div>
                                       <div style="color: green">Green: log2FC &lt; 0</div>
@@ -305,14 +311,14 @@
                       </div>
                       <div class="tab-pane" id="tab-help">
                           <div class="row">
-                              <div class="span9 offset3">
+                              <div class="col-md-9 offset3">
                                   m4_include(help.xhtml)
                               </div>
                           </div>
                       </div>
                       <div class="tab-pane" id="tab-about">
                           <div class="row">
-                              <div class="span9 offset3">
+                              <div class="col-md-9 offset3">
                                   <p> By Alexey Sergushichev (<a href="mailto:asergushichev@path.wustl.edu">asergushichev@path.wustl.edu</a>)</p>
                                   <p> This site must not be used for commercial purposes.<p>
                                   <p> You can find source code of this site <a href="https://bitbucket.org/assaron/gam">here</a>.</p>

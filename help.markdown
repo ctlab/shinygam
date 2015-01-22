@@ -1,6 +1,6 @@
+### Help
 
-This application is a web-interface to the <a href="bioconductor/GAM"
-target="_blank">GAM</a> (Gene And Metabolic data analysis) R-package.  GAM
+This application is a web-interface to the GAM (Gene And Metabolite data analysis) R-package.  GAM
 analyzes gene and/or metabolic differential expression (DE) data in a context
 of biochemical reactions.
 
@@ -138,4 +138,4 @@ When reactions are nodes, the following operations can be applied:
 You can download the module in an XGMML format by clicking the *Download XGMML*
 button. This file can be imported into Cytoscape. You can also download GAM's
 VizMap style for Cytoscape
-[here](/publications/supp_materials/GAM/GAM_VizMap.xml).
+<a id="downloadVizMap" class="shiny-download-link" href="" target="_blank">here</a> 
