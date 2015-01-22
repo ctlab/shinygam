@@ -70,9 +70,9 @@ workPanel <- tagList(
                 ),
             selectInput("solver",
                         "Select a solver",
-                        c("Heinz"="heinz",
-                          "Heinz 2"="heinz2",
-                          "Heuristic"="randHeur")),
+                        c("Heuristic"="randHeur",
+                          "Heinz"="heinz",
+                          "Heinz 2"="heinz2")),
             actionButton("find", "Find module"),
             conditionalPanel("network.hasReactionsAsEdges && network.usesRpairs",
                 checkboxInput(
