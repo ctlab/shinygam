@@ -373,6 +373,10 @@ shinyServer(function(input, output, session) {
         )
         
         num.positive = 150
+        if (is.null(es$fb.met) != is.null(es$fb.rxn)) {
+            num.positive <- num.positive / 2
+        }
+
         if (!is.null(es$fb.met)) {
             fb <- es$fb.met
             pvals <- with(es$met.de.ext, { x <- pval; names(x) <- ID; na.omit(x) })            

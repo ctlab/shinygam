@@ -55,45 +55,44 @@ workPanel <- tagList(
         ),
     div(id="module-panel", class="row top-buffer",
         column(width=3,
-        wellPanel(
-            conditionalPanel("network.hasGenes",
-                numericInput("geneLogFDR",
-                             label=HTML("log<sub>10</sub> FDR for genes"),
-                             max=0, min=-100, value=-6, step=1)),
-            conditionalPanel("network.hasMets",
-                numericInput("metLogFDR", 
-                             label=HTML("log<sub>10</sub> FDR for metabolites"),
-                             max=0, min=-100, value=-6, step=1),
-                numericInput("absentMetScore", 
-                             label="Score for absent metabolites",
-                             max=0, min=-100, value=-1, step=1)
-                ),
-            actionButton("find", "Find module"),
-            conditionalPanel("network.hasReactionsAsEdges && network.usesRpairs",
-                checkboxInput(
-                    "addTransPairs", 
-                    label="Add trans- edges",
-                    value=TRUE)),
+            conditionalPanel("network.available",
+                wellPanel(
+                    conditionalPanel("network.hasGenes",
+                        numericInput("geneLogFDR",
+                                     label=HTML("log<sub>10</sub> FDR for genes"),
+                                     max=0, min=-100, value=-6, step=1)),
+                    conditionalPanel("network.hasMets",
+                        numericInput("metLogFDR", 
+                                     label=HTML("log<sub>10</sub> FDR for metabolites"),
+                                     max=0, min=-100, value=-6, step=1),
+                        numericInput("absentMetScore", 
+                                     label="Score for absent metabolites",
+                                     max=0, min=-100, value=-1, step=1)
+                        ),
+                    actionButton("find", "Find module"),
+                    conditionalPanel("network.hasReactionsAsEdges && network.usesRpairs",
+                        checkboxInput(
+                            "addTransPairs", 
+                            label="Add trans- edges",
+                            value=TRUE)),
 
-            conditionalPanel("network.hasReactionsAsNodes",
-                checkboxInput(
-                    "addMetabolitesForReactions",
-                    label="Add all reactnas for the reactions",
-                    value=FALSE),
-                checkboxInput(
-                    "addInterconnections",
-                    label="Add interconnections",
-                    value=FALSE),
-                checkboxInput(
-                    "removeHangingNodes",
-                    label="Remove hanging nodes",
-                    value=FALSE),
-                checkboxInput(
-                    "simplifyReactionNodes",
-                    label="Simplify reaction nodes",
-                    value=FALSE)
-                )
-            ),
+                    conditionalPanel("network.hasReactionsAsNodes",
+                        checkboxInput(
+                            "addMetabolitesForReactions",
+                            label="Add all reactnas for the reactions",
+                            value=FALSE),
+                        checkboxInput(
+                            "addInterconnections",
+                            label="Add interconnections",
+                            value=FALSE),
+                        checkboxInput(
+                            "removeHangingNodes",
+                            label="Remove hanging nodes",
+                            value=FALSE),
+                        checkboxInput(
+                            "simplifyReactionNodes",
+                            label="Simplify reaction nodes",
+                            value=FALSE)))),
             conditionalPanel("module.available",
                 h3("Module summary"),
                 uiOutput("moduleSummary"),
