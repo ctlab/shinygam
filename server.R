@@ -15,8 +15,8 @@ networks <- list(
     "mmu"=kegg.mouse.network,
     "hsa"=kegg.human.network)
 
-heinz.py <- "/usr/local/lib/heinz/heinz.py"
 heinz2 <- "/usr/local/lib/heinz2/heinz"
+solver <- heinz2.solver(heinz2, timeLimit=15)
 
 read.table.smart <- function(path, ...) {
     fields <- list(...)    
@@ -369,8 +369,7 @@ shinyServer(function(input, output, session) {
                 network.hasGenes = !is.null(es$fb.rxn),
                 network.hasMets = !is.null(es$fb.met),
                 network.usesRpairs = !is.null(es) && es$use.rpairs
-            ),
-            "showFastHeinzAndMWCS(network.hasReactionsAsNodes);"
+            )
         )
         
         num.positive = 150
@@ -421,24 +420,6 @@ shinyServer(function(input, output, session) {
         
         if (is.null(es)) {
             return(NULL)
-        }
-
-        solverName <- isolate(input$solver)
-        if (solverName == "heinz2") {
-            solver <- heinz2.solver(
-                heinz2,
-                timeLimit=30)
-                #timeLimit=min(isolate(input$mwcsTimeLimit), 120))
-        } else if (solverName == "heinz") {
-            solver <- heinz.solver(
-                heinz.py, 
-                timeLimit=60)
-                #timeLimit=min(isolate(input$heinzTimeLimit), 240))
-        } else if (solverName == "randHeur") {
-            set.seed(42)
-            solver <- randHeur.solver(4)
-        } else {
-            stop(paste("There is no solver called", solverName))
         }
 
         longProcessStart()

@@ -305,17 +305,3 @@ function loadGraph(container, graph) {
     });
 }
 
-function showFastHeinzAndMWCS(shouldShow) {
-    if (shouldShow) {
-        $("option[value='fastHeinz']").removeAttr("disabled");
-        $("option[value='mwcs']").removeAttr("disabled");
-    } else {
-        $("option[value='fastHeinz']").attr("disabled", "disabled");
-        $("option[value='mwcs']").attr("disabled", "disabled");
-        if ($("#solver").val() == "fastHeinz" || 
-            $("#solver").val() == "mwcs") {
-            $("#solver").val("heinz");
-        }
-    }
-}
-
