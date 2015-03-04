@@ -82,19 +82,7 @@ scoring nodes and edges based on their p-values such that positive scores
 correspond to significant p-values and negative scores correspond to
 insignificant changes. Then the problem of finding a connected subgraph with
 maximum summary weight (maximum-weight connected subgraph, MWCS problem) is
-solved.
-
-This site supports three solvers:
-
-* The [Heinz solver](http://www.mi.fu-berlin.de/w/LiSA/Heinz): it's the
-  default solver, as it works for both interpretations of reactions.
-* The MWCS solver: this solver can provide more interactive experience because
-  when reaching time limit it outputs the best solution found so far.
-* The heuristic search: this solver is from R-package BioNet. Added for
-  comparison, as it's distributed freely.
-
-As the last two solvers don't support edge scores they are not available when
-reactions are interpreted as edges.
+solved. We use the [Heinz 2 solver](https://software.cwi.nl/cwisoftware/software/heinz).
 
 The *FDR values*, *Score for absent metabolites*, and *Score for absent
 reactions* options control the size of the module. 
