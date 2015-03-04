@@ -388,6 +388,10 @@ shinyServer(function(input, output, session) {
             recRxnFDR <- GAM:::recommendedFDR(fb, pvals, num.positive=num.positive)
             res <- paste0(res, sprintf('$("#geneLogFDR").val(%.1f).trigger("change");', log10(recRxnFDR)))
         }
+        
+        if (!is.null(es)) {
+            res <- paste0(res, '$("#find").trigger("click");')
+        }
         res
     })
     
