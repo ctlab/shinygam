@@ -4,6 +4,7 @@ library(igraph)
 library(GAM)
 library(GAM.db)
 library(GAM.networks)
+library(RCurl)
 
 options(shiny.error=traceback)
 
@@ -17,6 +18,9 @@ networks <- list(
 
 heinz2 <- "/usr/local/lib/heinz2/heinz"
 solver <- heinz2.solver(heinz2, timeLimit=15)
+
+example.gene.de.path <- "https://artyomovlab.wustl.edu/publications/supp_materials/GAM_2015/Ctrl.vs.MandLPSandIFNg.gene.de.tsv"
+example.met.de.path <- "https://artyomovlab.wustl.edu/publications/supp_materials/GAM_2015/Ctrl.vs.MandLPSandIFNg.met.de.tsv"
 
 read.table.smart <- function(path, ...) {
     fields <- list(...)    
@@ -161,8 +165,12 @@ simpleSelectInput <- function (inputId, choices, selected = NULL)
     selectTag
 }
 
+example.gene.de <- as.data.table(read.table(text=getURL(example.gene.de.path), stringsAsFactors=FALSE, header=1))
+attr(example.gene.de, "name") <- "example"
+example.met.de <- as.data.table(read.table(text=getURL(example.met.de.path), stringsAsFactors=FALSE, header=1))
+attr(example.met.de, "name") <- "example"
+
 shinyServer(function(input, output, session) {
-    
     longProcessStart <- function() {
         session$sendCustomMessage(type='showWaitMessage', list(value=T))
     }
@@ -173,6 +181,10 @@ shinyServer(function(input, output, session) {
 
 
     geneDEInput <- reactive({
+        if (input$loadExample) {
+            return(example.gene.de)
+        }
+
         if (is.null(input$geneDE)) {
             # User has not uploaded a file yet
             return(NULL)
@@ -228,6 +240,10 @@ shinyServer(function(input, output, session) {
     
     
     metDEInput <- reactive({
+        if (input$loadExample) {
+            return(example.met.de)
+        }
+
         if (is.null(input$metDE)) {
             # User has not uploaded a file yet
             return(NULL)
@@ -538,6 +554,15 @@ shinyServer(function(input, output, session) {
     output$GAMVersion <- renderUI({
         p(paste("GAM version:", sessionInfo()$otherPkgs$GAM$Revision))
     })
+
+    output$geneDEExample <- renderUI({
+        a("here", href=example.gene.de.path)
+    })
+
+    output$metDEExample <- renderUI({
+        a("here", href=example.met.de.path)
+    })
+    
 
     output$downloadVizMap <- downloadHandler(
         filename = "GAM_VizMap.xml",

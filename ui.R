@@ -19,6 +19,10 @@ workPanel <- tagList(
                   "Human"="hsa"),
                 selected="mmu"
                 ),
+            checkboxInput(
+                "loadExample",
+                label="Load example",
+                value=FALSE),
             fileInput("geneDE", "File with gene DE data"),
             fileInput("metDE", "File with metabolic DE data"),
             #uiOutput("reactionsAsHolder"),

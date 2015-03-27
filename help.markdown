@@ -33,10 +33,14 @@ contain a header with column names. Files should contain the following columns:
 to guess which one to use.** If you favorite DE tool produce names that GAM
 can not recoginze, please tell me and I will try to add it.
 
+
 The "log2FC" column is optional, but we recommend to provide it if possible, as it's
 used for colors in graph visualizing. Any other columns will be copied to a
-network as node or edge attributes.  Example data for genes and metabolites can be
-downloaded [here](/publications/supp_materials/GAM/).
+network as node or edge attributes.  Example data can be 
+downloaded:
+
+* <div id="geneDEExample" style="display: inline-block" class="shiny-html-output"></div> for genes,
+* <div id="metDEExample" style="display: inline-block" class="shiny-html-output"></div> for metabolites.
 
 After files are uploaded, a file summary is displayed. Verify that the files
 were parsed correctly.
