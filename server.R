@@ -397,7 +397,7 @@ shinyServer(function(input, output, session) {
             fb <- es$fb.met
             pvals <- with(es$met.de.ext, { x <- pval; names(x) <- ID; na.omit(x) })            
             recMetFDR <- GAM:::recommendedFDR(fb, pvals, num.positive=num.positive)
-            recAbsentMetScore <- GAM:::scoreValue(fb, 1, recMetFDR)
+            recAbsentMetScore <- min(GAM:::scoreValue(fb, 1, recMetFDR), -0.1)
             res <- paste0(res, sprintf('$("#metLogFDR").val(%.1f).trigger("change");', log10(recMetFDR)))
             res <- paste0(res, sprintf('$("#absentMetScore").val(%.1f).trigger("change");', recAbsentMetScore))
         }
