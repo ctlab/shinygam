@@ -145,6 +145,7 @@ $(window).on("popstate", function() {
 */
 
 window.onload = function() {
+    var panZoomModule = svgPanZoom('#module svg');
 
     // d3.select(window).on("resize", sizeChange);
 
@@ -195,15 +196,20 @@ window.onload = function() {
 
 }
 
+var glGraph
+
 function loadGraph(container, graph) {
     if (!("nodes" in graph) || !("edges" in graph)) {
         return;
     }
+    glGraph = graph;
 
     var width = $(container).width(),
         height = $(container).height();
 
-    graph.nodes.map(function(n) { n.x = n.x * width; n.y = n.y * height; })
+    scale = Math.min(width, height);
+
+    graph.nodes.map(function(n) { n.x = n.x * scale; n.y = n.y * scale; })
 
     container.force = d3.layout.force()
         .nodes(graph.nodes)
@@ -211,7 +217,10 @@ function loadGraph(container, graph) {
         .charge(-300)
         .linkDistance(100)
         .size([width, height])
-        .start();
+        .start()
+        .alpha(0.1);
+        
+
 
     container.drag = container.force.drag()
         .on("dragstart", function(d) { d3.event.sourceEvent.stopPropagation(); } );
@@ -303,5 +312,6 @@ function loadGraph(container, graph) {
                 }
         });
     });
+
 }
 

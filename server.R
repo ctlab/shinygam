@@ -12,11 +12,15 @@ data("met.id.map")
 data("kegg.human.network")
 data("kegg.mouse.network")
 
+# :ToDo: it's a hack
+kegg.mouse.network$rxn2name$name <- ""
+kegg.human.network$rxn2name$name <- ""
+
 networks <- list(
     "mmu"=kegg.mouse.network,
     "hsa"=kegg.human.network)
 
-heinz2 <- "/usr/local/lib/heinz2/heinz"
+heinz2 <- "/usr/local/lib/heinz2/heinz.bak"
 solver <- heinz2.solver(heinz2, timeLimit=15)
 
 example.gene.de.path <- "https://artyomovlab.wustl.edu/publications/supp_materials/GAM_2015/Ctrl.vs.MandLPSandIFNg.gene.de.tsv"
@@ -506,7 +510,10 @@ shinyServer(function(input, output, session) {
             
         module$description.string <- rawModuleInput()$description.string
 
-        layout <- layout.norm(layout.kamada.kawai(module), 0, 1, 0, 1)
+        #layout <- layout.norm(layout.kamada.kawai(module), 0, 1, 0, 1)
+        set.seed(42)
+        start <- layout.kamada.kawai(module)
+        layout <- layout.norm(layout.fruchterman.reingold(module, start=start, niter=2000), 0, 1, 0, 1)
         V(module)$x <- layout[,1]
         V(module)$y <- layout[,2]
 
@@ -535,9 +542,13 @@ shinyServer(function(input, output, session) {
             )        
     })
     
-     output$module <- renderGraph({
-         moduleInput()
-     })
+    #output$module <- renderGraph({
+    #    moduleInput()
+    #})
+
+    output$module <- renderUI({
+        HTML(readLines(svgFile()), "<script>var panZoomModule = svgPanZoom('#module svg');</script>")
+    })
     
     output$downloadNetwork <- downloadHandler(
         filename = reactive({ paste0("network.", tolower(esInput()$network$organism), ".xgmml") }),
@@ -549,6 +560,43 @@ shinyServer(function(input, output, session) {
         filename = reactive({ paste0("module", moduleInput()$description.string, ".xgmml") }),
         content = function(file) {
             saveModuleToXgmml(moduleInput(), file=file, moduleInput()$description.string)
+        })
+
+    dotFile <- reactive({
+         m <- moduleInput()
+         res <- tempfile(pattern="module", fileext=".dot")
+         saveModuleToDot(m, file=res, name=m$description.string)
+         res
+    })
+
+    svgFile <- reactive({
+        df <- dotFile()
+        res <- paste0(df, ".svg")
+        system2("neato", c("-Tsvg", 
+                           "-o", res,
+                           df))
+        res
+    })
+
+    pdfFile <- reactive({
+        df <- dotFile()
+        res <- paste0(df, ".pdf")
+        system2("neato", c("-Tpdf", 
+                           "-o", res,
+                           df))
+        res
+    })
+    
+    output$downloadPDF <- downloadHandler(
+        filename = reactive({ paste0("module", moduleInput()$description.string, ".pdf") }),
+        content = function(file) {
+            file.copy(pdfFile(), file) 
+        })
+
+    output$downloadDot <- downloadHandler(
+        filename = reactive({ paste0("module", moduleInput()$description.string, ".dot") }),
+        content = function(file) {
+            file.copy(dotFile(), file) 
         })
     
     output$GAMVersion <- renderUI({

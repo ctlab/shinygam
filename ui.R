@@ -100,7 +100,8 @@ workPanel <- tagList(
             conditionalPanel("module.available",
                 h3("Module summary"),
                 uiOutput("moduleSummary"),
-                downloadButton("downloadModule")),
+                downloadButton("downloadModule", "XGMML"),
+                downloadButton("downloadPDF", "PDF")),
             div(id="legend",
                 p(),
                 div(style="color: red", "Red: log2FC > 0"),
@@ -109,7 +110,8 @@ workPanel <- tagList(
                 )
             ),
         mainPanel(width=9,
-            div(id="module", class="graph-output")
+            #div(id="module", class="graph-output")
+            uiOutput("module", width="100%", height="100%")
             )
         )
     )
@@ -123,7 +125,9 @@ aboutPanel <- fixedRow(
 shinyUI(
     fixedPage(
         tags$head(
+        includeScript("http://ariutta.github.io/svg-pan-zoom/dist/svg-pan-zoom.min.js"),
         tags$script(src="d3.v3.min.js"),
+        #tags$script(src="d3.v3.js"),
         tags$script(src="gam.js"),
         tags$link(rel="stylesheet", href="gam.css"),
         includeScript("ga.js"),

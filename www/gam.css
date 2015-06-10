@@ -115,3 +115,7 @@ span.jslider {
   vertical-align: middle;
   line-height: normal;
 }
+
+#module {
+    background-color: #eee;
+}
