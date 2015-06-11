@@ -100,18 +100,21 @@ workPanel <- tagList(
             conditionalPanel("module.available",
                 h3("Module summary"),
                 uiOutput("moduleSummary"),
-                downloadButton("downloadModule", "XGMML"),
-                downloadButton("downloadPDF", "PDF")),
+                downloadButton("downloadPDF", "PDF"),
+                downloadButton("downloadModule", "XGMML")
+                ),
             div(id="legend",
                 p(),
                 div(style="color: red", "Red: log2FC > 0"),
                 div(style="color: green", "Green: log2FC < 0"),
                 div(style="color: #00acad", "Aqua: log2FC not available")
-                )
+                ),
+            p(),
+            downloadButton("downloadVizMap", "VizMap")
             ),
         mainPanel(width=9,
             #div(id="module", class="graph-output")
-            uiOutput("module", width="100%", height="100%")
+            uiOutput("module")
             )
         )
     )

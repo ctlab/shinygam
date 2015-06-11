@@ -20,7 +20,7 @@ networks <- list(
     "mmu"=kegg.mouse.network,
     "hsa"=kegg.human.network)
 
-heinz2 <- "/usr/local/lib/heinz2/heinz.bak"
+heinz2 <- "/usr/local/lib/heinz2/heinz"
 solver <- heinz2.solver(heinz2, timeLimit=15)
 
 example.gene.de.path <- "https://artyomovlab.wustl.edu/publications/supp_materials/GAM_2015/Ctrl.vs.MandLPSandIFNg.gene.de.tsv"
@@ -547,7 +547,13 @@ shinyServer(function(input, output, session) {
     #})
 
     output$module <- renderUI({
-        HTML(readLines(svgFile()), "<script>var panZoomModule = svgPanZoom('#module svg');</script>")
+        sf <- svgFile()
+
+        if (!is.null(sf)) {
+            HTML(readLines(sf), "<script>var panZoomModule = svgPanZoom('#module svg');</script>")
+        } else {
+            HTML("")
+        }
     })
     
     output$downloadNetwork <- downloadHandler(
@@ -563,14 +569,20 @@ shinyServer(function(input, output, session) {
         })
 
     dotFile <- reactive({
-         m <- moduleInput()
-         res <- tempfile(pattern="module", fileext=".dot")
-         saveModuleToDot(m, file=res, name=m$description.string)
-         res
+        m <- moduleInput()
+        if (is.null(m)) {
+            return(NULL)
+        }
+        res <- tempfile(pattern="module", fileext=".dot")
+        saveModuleToDot(m, file=res, name=m$description.string)
+        res
     })
 
     svgFile <- reactive({
         df <- dotFile()
+        if (is.null(df)) {
+            return(NULL)
+        }
         res <- paste0(df, ".svg")
         system2("neato", c("-Tsvg", 
                            "-o", res,
@@ -599,6 +611,14 @@ shinyServer(function(input, output, session) {
             file.copy(dotFile(), file) 
         })
     
+    output$downloadVizMap <- downloadHandler(
+        filename = "GAM_VizMap.xml",
+        content = function(file) {
+            file.copy(
+                from=system.file("GAM_VizMap.xml", package="GAM"),
+                to=file)
+        })
+
     output$GAMVersion <- renderUI({
         p(paste("GAM version:", sessionInfo()$otherPkgs$GAM$Revision))
     })
@@ -612,7 +632,7 @@ shinyServer(function(input, output, session) {
     })
     
 
-    output$downloadVizMap <- downloadHandler(
+    output$downloadVizMapInHelp <- downloadHandler(
         filename = "GAM_VizMap.xml",
         content = function(file) {
             file.copy(

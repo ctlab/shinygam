@@ -129,4 +129,4 @@ When reactions are nodes, the following operations can be applied:
 You can download the module in an XGMML format by clicking the *Download XGMML*
 button. This file can be imported into Cytoscape. You can also download GAM's
 VizMap style for Cytoscape 
-<a id="downloadVizMap" class="shiny-download-link" href="" target="_blank">here</a>.
+<a id="downloadVizMapInHelp" class="shiny-download-link" href="" target="_blank">here</a>.
