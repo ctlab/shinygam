@@ -89,7 +89,7 @@ workPanel <- tagList(
                     conditionalPanel("network.hasReactionsAsNodes",
                         checkboxInput(
                             "addMetabolitesForReactions",
-                            label="Add all reactnas for the reactions",
+                            label="Add all reagents for the reactions",
                             value=FALSE),
                         checkboxInput(
                             "addInterconnections",
