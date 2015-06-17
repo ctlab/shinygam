@@ -44,7 +44,11 @@ workPanel <- tagList(
                     "useRpairs",
                     label="Use RPAIRs",
                     value=TRUE)),
-            actionButton("preprocess", label="Make network")
+            checkboxInput(
+                "autoFindModule",
+                label="Run module search automatically",
+                value=TRUE),
+            actionButton("preprocess", label="Make global network")
             ),
         mainPanel(width=9,
             div(class="DEBlock",

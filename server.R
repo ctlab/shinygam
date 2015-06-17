@@ -416,7 +416,7 @@ shinyServer(function(input, output, session) {
             res <- paste0(res, sprintf('$("#geneLogFDR").val(%.1f).trigger("change");', log10(recRxnFDR)))
         }
         
-        if (!is.null(es)) {
+        if (!is.null(es) && isolate(input$autoFindModule)) {
             res <- paste0(res, '$("#find").trigger("click");')
         }
         res
