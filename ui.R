@@ -20,8 +20,12 @@ workPanel <- tagList(
                 selected="mmu"
                 ),
             checkboxInput(
-                "loadExample",
-                label="Load example",
+                "loadExampleGeneDE",
+                label="Example gene DE",
+                value=FALSE),
+            checkboxInput(
+                "loadExampleMetDE",
+                label="Example metabolic DE",
                 value=FALSE),
             fileInput("geneDE", "File with gene DE data"),
             fileInput("metDE", "File with metabolic DE data"),
@@ -43,10 +47,12 @@ workPanel <- tagList(
             actionButton("preprocess", label="Make network")
             ),
         mainPanel(width=9,
-            div(h3("Gene DE data"),
+            div(class="DEBlock",
+                h3("Gene DE data"),
                 uiOutput("geneDESummary"),
                 uiOutput("geneDETable")),
-            div(h3("Metabolite DE data"),
+            div(class="DEBlock",
+                h3("Metabolite DE data"),
                 uiOutput("metDESummary"),
                 uiOutput("metDETable")),
             div(class="bottom-buffer",

@@ -121,3 +121,10 @@ span.jslider {
     width: 100%;
     height: 100vh;
 }
+
+.DEBlock {
+    display: inline-block;
+    margin-right: 5%;
+    vertical-align: top;
+}
+

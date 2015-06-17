@@ -185,7 +185,7 @@ shinyServer(function(input, output, session) {
 
 
     geneDEInput <- reactive({
-        if (input$loadExample) {
+        if (input$loadExampleGeneDE) {
             return(example.gene.de)
         }
 
@@ -244,7 +244,7 @@ shinyServer(function(input, output, session) {
     
     
     metDEInput <- reactive({
-        if (input$loadExample) {
+        if (input$loadExampleMetDE) {
             return(example.met.de)
         }
 
@@ -402,6 +402,9 @@ shinyServer(function(input, output, session) {
             pvals <- with(es$met.de.ext, { x <- pval; names(x) <- ID; na.omit(x) })            
             recMetFDR <- GAM:::recommendedFDR(fb, pvals, num.positive=num.positive)
             recAbsentMetScore <- min(GAM:::scoreValue(fb, 1, recMetFDR), -0.1)
+            if (!is.null(es$fb.rxn)) {
+                recAbsentMetScore <- recAbsentMetScore * 5
+            }
             res <- paste0(res, sprintf('$("#metLogFDR").val(%.1f).trigger("change");', log10(recMetFDR)))
             res <- paste0(res, sprintf('$("#absentMetScore").val(%.1f).trigger("change");', recAbsentMetScore))
         }
@@ -457,6 +460,7 @@ shinyServer(function(input, output, session) {
                         rxn.fdr=gene.fdr,
                         absent.met.score=absent.met.score,
                         #absent.rxn.score=absent.rxn.score,
+                        met.score=-0.01,
                         solver=solver)
             
             if (is.null(res) || length(V(res)) == 0) {
@@ -573,8 +577,10 @@ shinyServer(function(input, output, session) {
         if (is.null(m)) {
             return(NULL)
         }
+        longProcessStart()
         res <- tempfile(pattern="module", fileext=".dot")
         saveModuleToDot(m, file=res, name=m$description.string)
+        longProcessStop()
         res
     })
 
@@ -592,6 +598,9 @@ shinyServer(function(input, output, session) {
 
     pdfFile <- reactive({
         df <- dotFile()
+        if (is.null(df)) {
+            return(NULL)
+        }
         res <- paste0(df, ".pdf")
         system2("neato", c("-Tpdf", 
                            "-o", res,
