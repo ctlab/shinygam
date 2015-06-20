@@ -83,6 +83,10 @@ workPanel <- tagList(
                                      label="Score for absent metabolites",
                                      max=0, min=-100, value=-1, step=1)
                         ),
+                    checkboxInput(
+                        "solveToOptimality", 
+                        label="Try to solve to optimality",
+                        value=FALSE),
                     actionButton("find", "Find module"),
                     conditionalPanel("network.hasReactionsAsEdges && network.usesRpairs",
                         checkboxInput(

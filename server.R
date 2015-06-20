@@ -5,6 +5,7 @@ library(GAM)
 library(GAM.db)
 library(GAM.networks)
 library(RCurl)
+library(parallel)
 
 options(shiny.error=traceback)
 
@@ -20,8 +21,49 @@ networks <- list(
     "mmu"=kegg.mouse.network,
     "hsa"=kegg.human.network)
 
+
+gmwcs.solver <- function (gmwcs, nthreads = 1, timeLimit = -1) {
+  function(network) {
+    network.orig <- network
+    score.edges <- "score" %in% list.edge.attributes(network)
+    score.nodes <- "score" %in% list.vertex.attributes(network)
+    graph.dir <- tempfile("graph")
+    dir.create(graph.dir)
+    edges.file <- file.path(graph.dir, "edges.txt")
+    nodes.file <- file.path(graph.dir, "nodes.txt")
+    if (!score.nodes) {
+      V(network)$score <- 0
+    }
+    
+    BioNet::writeHeinzNodes(network, file = nodes.file, use.score = TRUE)
+    BioNet::writeHeinzEdges(network, file = edges.file, use.score = score.edges)
+    system2(gmwcs, c("-n", nodes.file, "-e", edges.file, 
+                     "-m", nthreads, "-t", timeLimit
+                      # ,             "-b"
+    ))
+    solution.file <- paste0(nodes.file, ".out")
+    if (!file.exists(solution.file)) {
+      warning("Solution file not found")
+      return(NULL)
+    }
+    res <- GAM:::readGraph(node.file = solution.file,
+                     edge.file = paste0(edges.file, ".out"),
+                     network = network)
+    return(res)
+  }
+}
+
 heinz2 <- "/usr/local/lib/heinz2/heinz"
-solver <- heinz2.solver(heinz2, timeLimit=15)
+h.solver <- heinz.solver("/usr/local/lib/heinz/heinz-4m")
+h2.solver <- heinz2.solver(heinz2, timeLimit=30, nthreads=detectCores())
+g.solver <- gmwcs.solver("gmwcs", timeLimit=30, nthreads=detectCores())
+tl.solver <- function(net) {
+    if ("score" %in% list.edge.attributes(net) && max(abs(E(net)$score)) > 1e-3) {
+        g.solver(net)
+    } else {
+        h2.solver(net)
+    }
+}
 
 example.gene.de.path <- "https://artyomovlab.wustl.edu/publications/supp_materials/GAM_2015/Ctrl.vs.MandLPSandIFNg.gene.de.tsv"
 example.met.de.path <- "https://artyomovlab.wustl.edu/publications/supp_materials/GAM_2015/Ctrl.vs.MandLPSandIFNg.met.de.tsv"
@@ -183,10 +225,24 @@ shinyServer(function(input, output, session) {
         session$sendCustomMessage(type='showWaitMessage', list(value=F))
     }
 
+    loadExample <- reactive({
+        input$loadExampleGeneDE || input$loadExampleMetDE
+    })
+
+    getNetwork <- reactive({
+        if (loadExample()) {
+            kegg.mouse.network
+        } else {
+            networks[[input$network]]
+        }
+    })
 
     geneDEInput <- reactive({
-        if (input$loadExampleGeneDE) {
-            return(example.gene.de)
+        if (loadExample()) {
+            if (input$loadExampleGeneDE) {
+                return(example.gene.de)
+            }
+            return(NULL)
         }
 
         if (is.null(input$geneDE)) {
@@ -208,7 +264,7 @@ shinyServer(function(input, output, session) {
         if (is.null(data)) {
             return(NULL)
         }
-        network <- networks[[isolate(input$network)]]
+        network <- isolate(getNetwork())
         gene.id.map <- network$gene.id.map
         res <- getIdType(data$ID, gene.id.map)
         if (length(res) != 1) {
@@ -244,9 +300,13 @@ shinyServer(function(input, output, session) {
     
     
     metDEInput <- reactive({
-        if (input$loadExampleMetDE) {
-            return(example.met.de)
+        if (loadExample()) {
+            if (input$loadExampleMetDE) {
+                return(example.met.de)
+            }
+            return(NULL)
         }
+
 
         if (is.null(input$metDE)) {
             # User has not uploaded a file yet
@@ -321,7 +381,7 @@ shinyServer(function(input, output, session) {
 
     esInput <- reactive({
         input$preprocess
-        network <- networks[[isolate(input$network)]]
+        network <- isolate(getNetwork())
         gene.de <- isolate(geneDEInput())
         gene.ids <- isolate(geneIdsType())
 
@@ -346,8 +406,6 @@ shinyServer(function(input, output, session) {
             reactions.as.edges = isolate(input$reactionsAs) == "edges"
             collapse.reactions = isolate(input$collapseReactions)
             use.rpairs = isolate(input$useRpairs)
-            collapse.reactions = TRUE
-            use.rpairs = TRUE
             
             es <- makeExperimentSet(
                 network=network,
@@ -455,6 +513,12 @@ shinyServer(function(input, output, session) {
 
         longProcessStart()
         tryCatch({
+            if (isolate(input$solveToOptimality)) {
+                solver <- h.solver
+            } else {
+                solver <- tl.solver
+            }
+
             res <- findModule(es,
                         met.fdr=met.fdr,
                         rxn.fdr=gene.fdr,
@@ -509,7 +573,7 @@ shinyServer(function(input, output, session) {
             if (input$simplifyReactionNodes) {
                 module <- simplifyReactionNodes(module, es)
             }
-            module <- expandReactionNodeAttributesToEdges(module)
+            #module <- expandReactionNodeAttributesToEdges(module)
         }
             
         module$description.string <- rawModuleInput()$description.string
