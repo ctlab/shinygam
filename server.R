@@ -216,6 +216,36 @@ attr(example.gene.de, "name") <- "example"
 example.met.de <- as.data.table(read.table(text=getURL(example.met.de.path), stringsAsFactors=FALSE, header=1))
 attr(example.met.de, "name") <- "example"
 
+generateFDRs <- function(es) {
+    res <- ""
+    num.positive = 150
+    if (is.null(es$fb.met) != is.null(es$fb.rxn)) {
+        num.positive <- num.positive / 2
+    }
+
+    if (!is.null(es$fb.met)) {
+        fb <- es$fb.met
+        pvals <- with(es$met.de.ext, { x <- pval; names(x) <- ID; na.omit(x) })            
+        recMetFDR <- GAM:::recommendedFDR(fb, pvals, num.positive=num.positive)
+        recAbsentMetScore <- min(GAM:::scoreValue(fb, 1, recMetFDR), -0.1)
+        if (!is.null(es$fb.rxn)) {
+            recAbsentMetScore <- recAbsentMetScore * 5
+        }
+        res <- paste0(res, sprintf('$("#metLogFDR").val(%.1f).trigger("change");', log10(recMetFDR)))
+        res <- paste0(res, sprintf('$("#absentMetScore").val(%.1f).trigger("change");', recAbsentMetScore))
+    }
+    
+    if (!is.null(es$fb.rxn)) {
+        fb <- es$fb.rxn
+        pvals <- with(es$rxn.de.ext, { x <- pval; names(x) <- ID; na.omit(x) })            
+        recRxnFDR <- GAM:::recommendedFDR(fb, pvals, num.positive=num.positive)
+        res <- paste0(res, sprintf('$("#geneLogFDR").val(%.1f).trigger("change");', log10(recRxnFDR)))
+    }
+            
+    message(sprintf("Generated FDRs: %s", res))
+    res
+}
+
 shinyServer(function(input, output, session) {
     longProcessStart <- function() {
         session$sendCustomMessage(type='showWaitMessage', list(value=T))
@@ -432,51 +462,50 @@ shinyServer(function(input, output, session) {
             ))
     })
     
+    output$FDRParameters <- reactive({
+        res <- sprintf("%s;", input$resetFDRs)
+        es <- NULL
+        tryCatch({
+            es <- isolate(esInput())
+        }, error=function(e) {})
+        
+        if (!is.null(es)) {
+            res <- paste0(res, generateFDRs(es))
+        } else {
+            res <- ""
+        }
+        message(sprintf("res: %s", res))
+        res 
+    })
+
     output$networkParameters <- reactive({
         es <- NULL
         tryCatch({
             es <- esInput()
         }, error=function(e) {})
         
-        
+        if (is.null(es)) {
+            return("")
+        }
+
         res <- paste0(
             makeJsAssignments(
-                network.available = !is.null(es),
-                network.hasReactionsAsNodes = !is.null(es) && !es$reactions.as.edges,
-                network.hasReactionsAsEdges = !is.null(es) && es$reactions.as.edges,
+                network.available = TRUE,
+                network.hasReactionsAsNodes = !es$reactions.as.edges,
+                network.hasReactionsAsEdges = es$reactions.as.edges,
                 network.hasGenes = !is.null(es$fb.rxn),
                 network.hasMets = !is.null(es$fb.met),
-                network.usesRpairs = !is.null(es) && es$use.rpairs
+                network.usesRpairs = es$use.rpairs
             )
         )
         
-        num.positive = 150
-        if (is.null(es$fb.met) != is.null(es$fb.rxn)) {
-            num.positive <- num.positive / 2
-        }
-
-        if (!is.null(es$fb.met)) {
-            fb <- es$fb.met
-            pvals <- with(es$met.de.ext, { x <- pval; names(x) <- ID; na.omit(x) })            
-            recMetFDR <- GAM:::recommendedFDR(fb, pvals, num.positive=num.positive)
-            recAbsentMetScore <- min(GAM:::scoreValue(fb, 1, recMetFDR), -0.1)
-            if (!is.null(es$fb.rxn)) {
-                recAbsentMetScore <- recAbsentMetScore * 5
-            }
-            res <- paste0(res, sprintf('$("#metLogFDR").val(%.1f).trigger("change");', log10(recMetFDR)))
-            res <- paste0(res, sprintf('$("#absentMetScore").val(%.1f).trigger("change");', recAbsentMetScore))
-        }
-        
-        if (!is.null(es$fb.rxn)) {
-            fb <- es$fb.rxn
-            pvals <- with(es$rxn.de.ext, { x <- pval; names(x) <- ID; na.omit(x) })            
-            recRxnFDR <- GAM:::recommendedFDR(fb, pvals, num.positive=num.positive)
-            res <- paste0(res, sprintf('$("#geneLogFDR").val(%.1f).trigger("change");', log10(recRxnFDR)))
-        }
-        
-        if (!is.null(es) && isolate(input$autoFindModule)) {
+        if (isolate(input$autoFindModule)) {
+            res <- paste0(res, generateFDRs(es))
             res <- paste0(res, '$("#find").trigger("click");')
         }
+
+        res <- paste0(res, '$("#find").removeAttr("disabled").addClass("btn-default");')
+        res <- paste0(res, '$("#resetFDRs").removeAttr("disabled").addClass("btn-default");')
         res
     })
     

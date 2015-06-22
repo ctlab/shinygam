@@ -145,7 +145,7 @@ $(window).on("popstate", function() {
 */
 
 window.onload = function() {
-    var panZoomModule = svgPanZoom('#module svg');
+    // var panZoomModule = svgPanZoom('#module svg');
 
     // d3.select(window).on("resize", sizeChange);
 

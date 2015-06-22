@@ -1,5 +1,11 @@
 library(markdown)
 
+myActionButton <- function (inputId, label, icon = NULL, ...) 
+{
+    tags$button(id = inputId, type = "button", class = "btn action-button", 
+        list(icon, label), ...)
+}
+
 workPanel <- tagList(
     fixedRow(
         column(12,
@@ -48,7 +54,7 @@ workPanel <- tagList(
                 "autoFindModule",
                 label="Run module search automatically",
                 value=TRUE),
-            actionButton("preprocess", label="Make global network")
+            actionButton("preprocess", label="Step 1: Make network")
             ),
         mainPanel(width=9,
             div(class="DEBlock",
@@ -69,25 +75,26 @@ workPanel <- tagList(
         ),
     div(id="module-panel", class="row top-buffer",
         column(width=3,
-            conditionalPanel("network.available",
-                wellPanel(
-                    conditionalPanel("network.hasGenes",
-                        numericInput("geneLogFDR",
-                                     label=HTML("log<sub>10</sub> FDR for genes"),
-                                     max=0, min=-100, value=-6, step=1)),
-                    conditionalPanel("network.hasMets",
-                        numericInput("metLogFDR", 
-                                     label=HTML("log<sub>10</sub> FDR for metabolites"),
-                                     max=0, min=-100, value=-6, step=1),
-                        numericInput("absentMetScore", 
-                                     label="Score for absent metabolites",
-                                     max=0, min=-100, value=-1, step=1)
-                        ),
-                    checkboxInput(
-                        "solveToOptimality", 
-                        label="Try to solve to optimality",
-                        value=FALSE),
-                    actionButton("find", "Find module"),
+            wellPanel(
+                conditionalPanel("network.hasGenes",
+                    numericInput("geneLogFDR",
+                                 label=HTML("log<sub>10</sub> FDR for genes"),
+                                 max=0, min=-100, value=-6, step=0.5)),
+                conditionalPanel("network.hasMets",
+                    numericInput("metLogFDR", 
+                                 label=HTML("log<sub>10</sub> FDR for metabolites"),
+                                 max=0, min=-100, value=-6, step=0.5),
+                    numericInput("absentMetScore", 
+                                 label="Score for absent metabolites",
+                                 max=0, min=-100, value=-20, step=1)
+                    ),
+                myActionButton("resetFDRs", "Reset to default", disabled=""),
+                checkboxInput(
+                    "solveToOptimality", 
+                    label="Try to solve to optimality",
+                    value=FALSE),
+                myActionButton("find", "Step 2: Find module", disabled=""),
+                conditionalPanel("network.available",
                     conditionalPanel("network.hasReactionsAsEdges && network.usesRpairs",
                         checkboxInput(
                             "addTransPairs", 
@@ -124,7 +131,7 @@ workPanel <- tagList(
                 div(style="color: #00acad", "Aqua: log2FC not available")
                 ),
             p(),
-            downloadButton("downloadVizMap", "VizMap")
+            downloadButton("downloadVizMap", "Cytoscape VizMap")
             ),
         mainPanel(width=9,
             #div(id="module", class="graph-output")
