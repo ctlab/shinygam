@@ -411,6 +411,8 @@ shinyServer(function(input, output, session) {
 
     esInput <- reactive({
         input$preprocess
+        message("preprocessing")
+        #input$runAll
         network <- isolate(getNetwork())
         gene.de <- isolate(geneDEInput())
         gene.ids <- isolate(geneIdsType())
@@ -508,6 +510,19 @@ shinyServer(function(input, output, session) {
         res <- paste0(res, '$("#resetFDRs").removeAttr("disabled").addClass("btn-default");')
         res
     })
+
+    output$enableMakeNetwork <- renderJs({
+        res <- ""
+        if (!is.null(geneDEInput()) || !is.null(metDEInput())) {
+            res <- paste0(res, '$("#runStep1").removeAttr("disabled").addClass("btn-default");')
+            res <- paste0(res, '$("#runAll").removeAttr("disabled").addClass("btn-default");')
+        } else {
+            res <- paste0(res, '$("#runStep1").attr("disabled", "disabled");')
+            res <- paste0(res, '$("#runAll").attr("disabled", "disabled");')
+        }
+        message(res)
+        res
+    })
     
     output$showModulePanel <- renderJs({
         if (!is.null(esInput())) { return("mp = $('#module-panel'); mp[0].scrollIntoView();")
@@ -528,6 +543,7 @@ shinyServer(function(input, output, session) {
     
     rawModuleInput <- reactive({
         input$find
+        #input$runAll
         met.fdr <- isolate(metFDR())
         gene.fdr <- isolate(geneFDR())
         absent.met.score <- isolate(input$absentMetScore)
@@ -547,6 +563,13 @@ shinyServer(function(input, output, session) {
             } else {
                 solver <- tl.solver
             }
+            message(paste0(".mp", # min p-value
+                                             if (es$reactions.as.edges) ".re" else ".rn",
+                                             ".mf=", format(met.fdr, scientific=T),
+                                             ".rf=", format(gene.fdr, scientific=T),
+                                             ".ams=", absent.met.score
+                                            #, ".ars=", absent.rxn.score
+                                             ))
 
             res <- findModule(es,
                         met.fdr=met.fdr,

@@ -50,11 +50,19 @@ workPanel <- tagList(
                     "useRpairs",
                     label="Use RPAIRs",
                     value=TRUE)),
-            checkboxInput(
-                "autoFindModule",
-                label="Run module search automatically",
-                value=TRUE),
-            actionButton("preprocess", label="Step 1: Make network")
+            conditionalPanel("false",
+                checkboxInput(
+                    "autoFindModule",
+                    label="Set FDRs & run step 2 automatically",
+                    value=TRUE),
+                actionButton("preprocess", label="Step 1: Make network")
+            ),
+            myActionButton("runStep1", label="Step 1: Make network", 
+                          onclick='$("#autoFindModule")[0].checked=false; $("#autoFindModule").trigger("change"); $("#preprocess").trigger("click")',
+                          disabled=""),
+            myActionButton("runAll",   label="Run steps 1 & 2", 
+                          onclick='$("#autoFindModule")[0].checked=true; $("#autoFindModule").trigger("change"); $("#preprocess").trigger("click")',
+                          disabled="")
             ),
         mainPanel(width=9,
             div(class="DEBlock",
@@ -128,7 +136,7 @@ workPanel <- tagList(
                 p(),
                 div(style="color: red", "Red: log2FC > 0"),
                 div(style="color: green", "Green: log2FC < 0"),
-                div(style="color: #00acad", "Aqua: log2FC not available")
+                div(style="color: #7777ff", "Blue: log2FC not available")
                 ),
             p(),
             downloadButton("downloadVizMap", "Cytoscape VizMap")
