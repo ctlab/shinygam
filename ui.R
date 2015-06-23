@@ -101,7 +101,7 @@ workPanel <- tagList(
                                  label="Score for absent metabolites",
                                  max=0, min=-100, value=-20, step=1)
                     ),
-                myActionButton("resetFDRs", "Reset to default", disabled=""),
+                myActionButton("resetFDRs", "Autogenerate FDRs", disabled=""),
                 checkboxInput(
                     "solveToOptimality", 
                     label="Try to solve to optimality",
@@ -148,7 +148,8 @@ workPanel <- tagList(
     )
 
 helpPanel <- fixedRow(
-    mainPanel(includeMarkdown("help.markdown")))
+    mainPanel(id="helpPanel",
+              includeMarkdown("help.markdown")))
 
 aboutPanel <- fixedRow(
     mainPanel(includeMarkdown("about.markdown")))

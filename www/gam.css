@@ -132,3 +132,7 @@ span.jslider {
     margin-top: 6px;
     margin-bottom: 6px;
 }
+
+#helpPanel img {
+    max-width: 100%;
+}
