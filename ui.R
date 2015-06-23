@@ -101,6 +101,9 @@ workPanel <- tagList(
                     "solveToOptimality", 
                     label="Try to solve to optimality",
                     value=FALSE),
+                conditionalPanel("network.available",
+                    uiOutput("solverString")
+                ),
                 myActionButton("find", "Step 2: Find module", disabled=""),
                 conditionalPanel("network.available",
                     conditionalPanel("network.hasReactionsAsEdges && network.usesRpairs",

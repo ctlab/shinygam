@@ -55,15 +55,14 @@ gmwcs.solver <- function (gmwcs, nthreads = 1, timeLimit = -1) {
 
 heinz2 <- "/usr/local/lib/heinz2/heinz"
 h.solver <- heinz.solver("/usr/local/lib/heinz/heinz-4m")
+attr(h.solver, "description") <- "Heinz (time limit = 4m)"
+
 h2.solver <- heinz2.solver(heinz2, timeLimit=30, nthreads=detectCores())
+attr(h2.solver, "description") <- "Heinz2 (time limit = 30s)"
 g.solver <- gmwcs.solver("gmwcs", timeLimit=30, nthreads=detectCores())
-tl.solver <- function(net) {
-    if ("score" %in% list.edge.attributes(net) && max(abs(E(net)$score)) > 1e-3) {
-        g.solver(net)
-    } else {
-        h2.solver(net)
-    }
-}
+attr(g.solver, "description") <- "gmwcs (time limit = 30s)"
+
+
 
 example.gene.de.path <- "https://artyomovlab.wustl.edu/publications/supp_materials/GAM_2015/Ctrl.vs.MandLPSandIFNg.gene.de.tsv"
 example.met.de.path <- "https://artyomovlab.wustl.edu/publications/supp_materials/GAM_2015/Ctrl.vs.MandLPSandIFNg.met.de.tsv"
@@ -540,6 +539,31 @@ shinyServer(function(input, output, session) {
         10^input$geneLogFDR
     })
 
+    getSolver <- reactive({
+        es <- esInput()
+        if (is.null(es)) {
+            return(NULL)
+        }
+
+        if (input$solveToOptimality) {
+            h.solver
+        } else if (es$reactions.as.edges && !is.null(es$fb.rxn)) {
+            g.solver
+        } else {
+            h2.solver
+        }
+    })
+
+    output$solverString <- reactive({
+        es <- esInput()
+        solver <- getSolver()
+        if (!is.null(solver)) {
+            sprintf("Solver: %s", attr(solver, "description"))
+        } else {
+            ""
+        }
+    })
+
     
     rawModuleInput <- reactive({
         input$find
@@ -558,11 +582,7 @@ shinyServer(function(input, output, session) {
 
         longProcessStart()
         tryCatch({
-            if (isolate(input$solveToOptimality)) {
-                solver <- h.solver
-            } else {
-                solver <- tl.solver
-            }
+            solver <- isolate(getSolver())
             message(paste0(".mp", # min p-value
                                              if (es$reactions.as.edges) ".re" else ".rn",
                                              ".mf=", format(met.fdr, scientific=T),
@@ -712,6 +732,7 @@ shinyServer(function(input, output, session) {
                            df))
         res
     })
+
     
     output$downloadPDF <- downloadHandler(
         filename = reactive({ paste0("module", moduleInput()$description.string, ".pdf") }),
