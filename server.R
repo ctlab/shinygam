@@ -608,24 +608,13 @@ shinyServer(function(input, output, session) {
                 }
             }
         } else {
-            if (input$addMetabolitesForReactions) {
+            if (input$addCommonMetabolites) {
                 module <- addMetabolitesForReactions(module, es)
-            }
-            if (input$addInterconnections) {
-                module <- addInterconnections(module, es)
+                module <- removeHangingNodes(module)
             }
             
             if ("log2FC" %in% list.vertex.attributes(module))
             module <- addNormLogFC(module)
-            
-            if (input$removeHangingNodes) {
-                module <- removeHangingNodes(module)
-            }
-            
-            if (input$simplifyReactionNodes) {
-                module <- simplifyReactionNodes(module, es)
-            }
-            #module <- expandReactionNodeAttributesToEdges(module)
         }
             
         module$description.string <- rawModuleInput()$description.string

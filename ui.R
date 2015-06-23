@@ -111,21 +111,12 @@ workPanel <- tagList(
 
                     conditionalPanel("network.hasReactionsAsNodes",
                         checkboxInput(
-                            "addMetabolitesForReactions",
-                            label="Add all reagents for the reactions",
-                            value=FALSE),
-                        checkboxInput(
-                            "addInterconnections",
-                            label="Add interconnections",
-                            value=FALSE),
-                        checkboxInput(
-                            "removeHangingNodes",
-                            label="Remove hanging nodes",
-                            value=FALSE),
-                        checkboxInput(
-                            "simplifyReactionNodes",
-                            label="Simplify reaction nodes",
-                            value=FALSE)))),
+                            "addCommonMetabolites",
+                            label="Add common metabolites",
+                            value=FALSE)
+                        )
+                    )
+                ),
             conditionalPanel("module.available",
                 h3("Module summary"),
                 uiOutput("moduleSummary"),
