@@ -18,23 +18,28 @@ workPanel <- tagList(
         ),
     fixedRow(
         sidebarPanel(width=3,
-            selectInput(
-                "network",
-                label="Select an organism",
-                choices=c("Mouse"="mmu",
-                  "Human"="hsa"),
-                selected="mmu"
-                ),
             checkboxInput(
                 "loadExampleGeneDE",
-                label="Example gene DE",
+                label="Example DE for genes",
                 value=FALSE),
             checkboxInput(
                 "loadExampleMetDE",
-                label="Example metabolic DE",
+                label="Example DE for metabolites",
                 value=FALSE),
-            fileInput("geneDE", "File with gene DE data"),
-            fileInput("metDE", "File with metabolic DE data"),
+            conditionalPanel("input.loadExampleGeneDE || input.loadExampleMetDE",
+                p("Organism: Mouse")
+                ),
+            conditionalPanel("!input.loadExampleGeneDE && !input.loadExampleMetDE",
+                selectInput(
+                    "network",
+                    label="Select an organism",
+                    choices=c("Mouse"="mmu",
+                      "Human"="hsa"),
+                    selected="mmu"
+                    ),
+                fileInput("geneDE", "File with DE for genes"),
+                fileInput("metDE", "File with DE for metabolites")
+                ),
             #uiOutput("reactionsAsHolder"),
             selectInput("reactionsAs", 
                         label="Interpret reactions as",
@@ -66,11 +71,11 @@ workPanel <- tagList(
             ),
         mainPanel(width=9,
             div(class="DEBlock",
-                h3("Gene DE data"),
+                h3("Differential expression for genes"),
                 uiOutput("geneDESummary"),
                 uiOutput("geneDETable")),
             div(class="DEBlock",
-                h3("Metabolite DE data"),
+                h3("Differential expression for metabolites"),
                 uiOutput("metDESummary"),
                 uiOutput("metDETable")),
             div(class="bottom-buffer",
