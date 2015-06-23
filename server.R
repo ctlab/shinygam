@@ -210,9 +210,10 @@ simpleSelectInput <- function (inputId, choices, selected = NULL)
     selectTag
 }
 
-example.gene.de <- as.data.table(read.table(text=getURL(example.gene.de.path), stringsAsFactors=FALSE, header=1))
+# not sure if works
+example.gene.de <- force(as.data.table(read.table(text=getURL(example.gene.de.path), stringsAsFactors=FALSE, header=1)))
 attr(example.gene.de, "name") <- "example"
-example.met.de <- as.data.table(read.table(text=getURL(example.met.de.path), stringsAsFactors=FALSE, header=1))
+example.met.de <- force(as.data.table(read.table(text=getURL(example.met.de.path), stringsAsFactors=FALSE, header=1)))
 attr(example.met.de, "name") <- "example"
 
 generateFDRs <- function(es) {
