@@ -760,11 +760,11 @@ shinyServer(function(input, output, session) {
     })
 
     output$geneDEExample <- renderUI({
-        a("here", href=example.gene.de.path)
+        a("here", href=example.gene.de.path, target="_blank")
     })
 
     output$metDEExample <- renderUI({
-        a("here", href=example.met.de.path)
+        a("here", href=example.met.de.path, target="_blank")
     })
     
 
