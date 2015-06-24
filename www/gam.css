@@ -136,3 +136,8 @@ span.jslider {
 #helpPanel img {
     max-width: 100%;
 }
+
+.well button {
+    width: 100%;
+    white-space: normal;
+}

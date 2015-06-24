@@ -62,11 +62,12 @@ workPanel <- tagList(
                     value=TRUE),
                 actionButton("preprocess", label="Step 1: Make network")
             ),
+            myActionButton("runAll",   label="Run step 1, autogenerate FDRs and run step 2", 
+                          onclick='$("#autoFindModule")[0].checked=true; $("#autoFindModule").trigger("change"); $("#preprocess").trigger("click")',
+                          disabled=""),
+            div("or", style="text-align: center"),
             myActionButton("runStep1", label="Step 1: Make network", 
                           onclick='$("#autoFindModule")[0].checked=false; $("#autoFindModule").trigger("change"); $("#preprocess").trigger("click")',
-                          disabled=""),
-            myActionButton("runAll",   label="Run steps 1 & 2", 
-                          onclick='$("#autoFindModule")[0].checked=true; $("#autoFindModule").trigger("change"); $("#preprocess").trigger("click")',
                           disabled="")
             ),
         mainPanel(width=9,
@@ -137,7 +138,6 @@ workPanel <- tagList(
                 div(style="color: green", "Green: log2FC < 0"),
                 div(style="color: #7777ff", "Blue: log2FC not available")
                 ),
-            p(),
             downloadButton("downloadVizMap", "Cytoscape VizMap")
             ),
         mainPanel(width=9,
