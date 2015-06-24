@@ -598,6 +598,7 @@ shinyServer(function(input, output, session) {
                         absent.met.score=absent.met.score,
                         #absent.rxn.score=absent.rxn.score,
                         met.score=-0.01,
+                        rxn.score=-0.01,
                         solver=solver)
             
             if (is.null(res) || length(V(res)) == 0) {

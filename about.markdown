@@ -7,3 +7,5 @@ You can find source code of this site <a href="https://github.com/ctlab/shinygam
 <div id="GAMVersion" class="shiny-html-output"></div>
 
 Powered by R Shiny.
+
+The authors thank Nicole Rockweiler for the help with improving the web-service.
