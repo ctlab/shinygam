@@ -6,6 +6,14 @@ myActionButton <- function (inputId, label, icon = NULL, ...)
         list(icon, label), ...)
 }
 
+mySidebarPanel <- function(...) {
+    div(class="sidebar col-sm-3", tags$form(class="well", ...))
+}
+
+myMainPanel <- function(...) {
+    div(class="mainPanel col-sm-9", ...)
+}
+
 workPanel <- tagList(
     fixedRow(
         column(12,
@@ -17,7 +25,7 @@ workPanel <- tagList(
             )
         ),
     fixedRow(
-        sidebarPanel(width=3,
+        mySidebarPanel(
             checkboxInput(
                 "loadExampleGeneDE",
                 label="Example DE for genes",
@@ -70,7 +78,7 @@ workPanel <- tagList(
                           onclick='$("#autoFindModule")[0].checked=false; $("#autoFindModule").trigger("change"); $("#preprocess").trigger("click")',
                           disabled="")
             ),
-        mainPanel(width=9,
+        myMainPanel(
             div(class="DEBlock",
                 h3("Differential expression for genes"),
                 uiOutput("geneDESummary"),
@@ -88,7 +96,7 @@ workPanel <- tagList(
             )
         ),
     div(id="module-panel", class="row top-buffer",
-        column(width=3,
+        div(class="sidebar col-sm-3",
             wellPanel(
                 conditionalPanel("network.hasGenes",
                     numericInput("geneLogFDR",
@@ -138,9 +146,10 @@ workPanel <- tagList(
                 div(style="color: green", "Green: log2FC < 0"),
                 div(style="color: #7777ff", "Blue: log2FC not available")
                 ),
+            p(),
             downloadButton("downloadVizMap", "Cytoscape VizMap")
             ),
-        mainPanel(width=9,
+        myMainPanel(
             #div(id="module", class="graph-output")
             uiOutput("module")
             )
@@ -155,7 +164,7 @@ aboutPanel <- fixedRow(
     mainPanel(includeMarkdown("about.markdown")))
 
 shinyUI(
-    fixedPage(
+    fluidPage(
         tags$head(
         includeScript("http://ariutta.github.io/svg-pan-zoom/dist/svg-pan-zoom.min.js"),
         tags$script(src="d3.v3.min.js"),

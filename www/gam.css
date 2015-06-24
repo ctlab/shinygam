@@ -141,3 +141,19 @@ span.jslider {
     width: 100%;
     white-space: normal;
 }
+
+.sidebar {
+    width: 20em;
+}
+
+.mainPanel {
+    width: calc(100% - 20em);
+}
+
+.container-fluid {
+    max-width: 95%;
+}
+
+#helpPanel {
+    max-width: 60em;
+}
