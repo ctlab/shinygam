@@ -39,7 +39,7 @@ gmwcs.solver <- function (gmwcs, nthreads = 1, timeLimit = -1) {
     BioNet::writeHeinzEdges(network, file = edges.file, use.score = score.edges)
     system2(gmwcs, c("-n", nodes.file, "-e", edges.file, 
                      "-m", nthreads, "-t", timeLimit
-                      # ,             "-b"
+                      ,             "-b"
     ))
     solution.file <- paste0(nodes.file, ".out")
     if (!file.exists(solution.file)) {
@@ -54,7 +54,7 @@ gmwcs.solver <- function (gmwcs, nthreads = 1, timeLimit = -1) {
 }
 
 heinz2 <- "/usr/local/lib/heinz2/heinz"
-h.solver <- heinz.solver("/usr/local/lib/heinz/heinz-4m")
+h.solver <- heinz.solver("/usr/local/lib/heinz/heinz.py", timeLimit=4*60)
 attr(h.solver, "description") <- "Heinz (time limit = 4m)"
 
 h2.solver <- heinz2.solver(heinz2, timeLimit=30, nthreads=detectCores())
@@ -279,12 +279,14 @@ shinyServer(function(input, output, session) {
             # User has not uploaded a file yet
             return(NULL)
         }
+        message(sprintf("reading gene.de: %s", input$geneDE$name))
         
         res <- read.table.smart.de.gene(input$geneDE$datapath)
         if (!all(necessary.de.fields %in% names(res))) {
             stop(paste0("Genomic differential expression data should contain at least these fields: ", 
                         paste(necessary.de.fields, collapse=", ")))
         }
+        message("finished reading gene.de")
         attr(res, "name") <- input$geneDE$name
         res
     })
@@ -294,7 +296,7 @@ shinyServer(function(input, output, session) {
         if (is.null(data)) {
             return(NULL)
         }
-        network <- isolate(getNetwork())
+        network <- getNetwork()
         gene.id.map <- network$gene.id.map
         res <- getIdType(data$ID, gene.id.map)
         if (length(res) != 1) {
@@ -513,7 +515,19 @@ shinyServer(function(input, output, session) {
 
     output$enableMakeNetwork <- renderJs({
         res <- ""
-        if (!is.null(geneDEInput()) || !is.null(metDEInput())) {
+        canRun <- FALSE
+        tryCatch({
+            geneDE <- geneDEInput()
+            gIT <- geneIdsType()
+            metDE <- metDEInput()
+            mIT <- metIdsType()
+
+            canRun <- !is.null(geneDE) || !is.null(metDE)
+        }, error=function(e) {
+            # if anything happened, not running
+        })
+
+        if (canRun) {
             res <- paste0(res, '$("#runStep1").removeAttr("disabled").addClass("btn-default");')
             res <- paste0(res, '$("#runAll").removeAttr("disabled").addClass("btn-default");')
         } else {
