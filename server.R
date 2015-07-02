@@ -85,6 +85,10 @@ read.table.smart <- function(path, ...) {
     
     oldnames <- character(0)
     newnames <- character(0)
+
+    normalizeName <- function(x) {
+        gsub("[^a-z0-9]", "", tolower(x)) 
+    }
     
     for (field in names(fields)) {        
         if (field %in% colnames(res)) {
@@ -93,8 +97,8 @@ read.table.smart <- function(path, ...) {
         
         z <- na.omit(
             match(
-                tolower(c(field, fields[[field]])),
-                tolower(colnames(res))))
+                normalizeName(c(field, fields[[field]])),
+                normalizeName(colnames(res))))
         if (length(z) == 0) {
             next
         }
@@ -108,7 +112,7 @@ read.table.smart <- function(path, ...) {
 }
 
 read.table.smart.de <- function(path, ID=ID) {
-    read.table.smart(path, ID=ID, pval=c("p.value", "pvalue"), log2FC=c("log2foldchange", "logfc"))
+    read.table.smart(path, ID=ID, pval=c("pvalue"), log2FC=c("log2foldchange", "logfc"), name.orig=c("name"))
 }
 
 
