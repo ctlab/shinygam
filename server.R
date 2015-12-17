@@ -290,7 +290,6 @@ shinyServer(function(input, output, session) {
             stop(paste0("Genomic differential expression data should contain at least these fields: ", 
                         paste(necessary.de.fields, collapse=", ")))
         }
-        message("finished reading gene.de")
         attr(res, "name") <- input$geneDE$name
         res
     })
@@ -349,6 +348,8 @@ shinyServer(function(input, output, session) {
             return(NULL)
         }
         
+        message(sprintf("reading met.de: %s", input$metDE$name))
+
         res <- read.table.smart.de.met(input$metDE$datapath)
         if (!all(necessary.de.fields %in% names(res))) {
             stop(paste0("Metabolic differential expression data should contain at least these fields: ", 
