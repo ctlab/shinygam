@@ -287,8 +287,12 @@ shinyServer(function(input, output, session) {
         
         res <- read.table.smart.de.gene(input$geneDE$datapath)
         if (!all(necessary.de.fields %in% names(res))) {
-            stop(paste0("Genomic differential expression data should contain at least these fields: ", 
-                        paste(necessary.de.fields, collapse=", ")))
+            if (grep("xlsx?$", input$geneDE$name)) {
+                stop("We do not support excel files yet, please, use tab-separated files instead")
+            } else{
+                stop(paste0("Genomic differential expression data should contain at least these fields: ", 
+                            paste(necessary.de.fields, collapse=", ")))
+            }
         }
         attr(res, "name") <- input$geneDE$name
         res
@@ -352,8 +356,12 @@ shinyServer(function(input, output, session) {
 
         res <- read.table.smart.de.met(input$metDE$datapath)
         if (!all(necessary.de.fields %in% names(res))) {
-            stop(paste0("Metabolic differential expression data should contain at least these fields: ", 
-                        paste(necessary.de.fields, collapse=", ")))
+            if (grep("xlsx?$", input$metDE$name)) {
+                stop("We do not support excel files yet, please, use tab-separated files instead")
+            } else {
+                stop(paste0("Metabolic differential expression data should contain at least these fields: ", 
+                            paste(necessary.de.fields, collapse=", ")))
+            }
         }
         attr(res, "name") <- input$metDE$name
         res
