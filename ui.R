@@ -166,7 +166,7 @@ aboutPanel <- fixedRow(
 shinyUI(
     fluidPage(
         tags$head(
-        tags$script(srt="svg-pan-zoom.min.js"),
+        tags$script(src="svg-pan-zoom.min.js"),
         tags$script(src="d3.v3.min.js"),
         #tags$script(src="d3.v3.js"),
         tags$script(src="gam.js"),
