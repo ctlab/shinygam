@@ -80,8 +80,9 @@ read.table.smart <- function(path, ...) {
             break
         } 
     }
-    
-    res <- as.data.table(read.table(path, sep=sep, header=T, stringsAsFactors=F, check.names=F))
+
+    res <- read.table(path, sep=sep, header=T, stringsAsFactors=F, check.names=F)
+    res <- as.data.table(res, keep.rownames=is.character(attr(res, "row.names")))
     
     oldnames <- character(0)
     newnames <- character(0)
@@ -103,7 +104,7 @@ read.table.smart <- function(path, ...) {
             next
         }
         
-        oldnames <- c(oldnames, colnames(res)[z])
+        oldnames <- c(oldnames, colnames(res)[z[1]])
         newnames <- c(newnames, field)
     }
         
@@ -117,11 +118,11 @@ read.table.smart.de <- function(path, ID=ID) {
 
 
 read.table.smart.de.gene <- function(path) {
-    read.table.smart.de(path, ID=c("gene", "entrez", "symbol", ""))
+    read.table.smart.de(path, ID=c("gene", "entrez", "", "rn", "symbol"))
 }
 
 read.table.smart.de.met <- function(path) {
-    read.table.smart.de(path, ID=c("metabolite", "kegg", "hmdb", ""))
+    read.table.smart.de(path, ID=c("metabolite", "kegg", "hmdb", "", "rn"))
 }
 
 renderGraph <- function(expr, env=parent.frame(), quoted=FALSE) {
