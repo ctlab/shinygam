@@ -64,8 +64,8 @@ attr(g.solver, "description") <- "gmwcs (time limit = 30s)"
 
 
 
-example.gene.de.path <- "http://artyomovlab.wustl.edu/publications/supp_materials/GAM_2015/Ctrl.vs.MandLPSandIFNg.gene.de.tsv"
-example.met.de.path <- "http://artyomovlab.wustl.edu/publications/supp_materials/GAM_2015/Ctrl.vs.MandLPSandIFNg.met.de.tsv"
+example.gene.de.path <- "http://artyomovlab.wustl.edu/publications/supp_materials/GAM/Ctrl.vs.MandLPSandIFNg.gene.de.tsv"
+example.met.de.path <- "http://artyomovlab.wustl.edu/publications/supp_materials/GAM/Ctrl.vs.MandLPSandIFNg.met.de.tsv"
 
 read.table.smart <- function(path, ...) {
     fields <- list(...)    
