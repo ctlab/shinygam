@@ -669,13 +669,6 @@ shinyServer(function(input, output, session) {
             
         module$description.string <- rawModuleInput()$description.string
 
-        #layout <- layout.norm(layout.kamada.kawai(module), 0, 1, 0, 1)
-        set.seed(42)
-        start <- layout.kamada.kawai(module)
-        layout <- layout.norm(layout.fruchterman.reingold(module, start=start, niter=2000), 0, 1, 0, 1)
-        V(module)$x <- layout[,1]
-        V(module)$y <- layout[,2]
-
         module
     })
     
