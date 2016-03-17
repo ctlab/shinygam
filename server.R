@@ -12,14 +12,21 @@ options(shiny.error=traceback)
 data("met.id.map")
 data("kegg.human.network")
 data("kegg.mouse.network")
+data("kegg.arabidopsis.network")
+data("kegg.yeast.network")
 
 # :ToDo: it's a hack
 kegg.mouse.network$rxn2name$name <- ""
 kegg.human.network$rxn2name$name <- ""
+kegg.arabidopsis.network$rxn2name$name <- ""
+kegg.yeast.network$rxn2name$name <- ""
 
 networks <- list(
     "mmu"=kegg.mouse.network,
-    "hsa"=kegg.human.network)
+    "hsa"=kegg.human.network,
+    "ath"=kegg.arabidopsis.network,
+    "sce"=kegg.yeast.network
+    )
 
 
 gmwcs.solver <- function (gmwcs, nthreads = 1, timeLimit = -1) {

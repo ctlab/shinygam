@@ -42,7 +42,9 @@ workPanel <- tagList(
                     "network",
                     label="Select an organism",
                     choices=c("Mouse"="mmu",
-                      "Human"="hsa"),
+                      "Human"="hsa",
+                      "Arabidopsis"="ath",
+                      "Yeast"="sce"),
                     selected="mmu"
                     ),
                 fileInput("geneDE", "File with DE for genes"),
