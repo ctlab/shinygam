@@ -6,8 +6,13 @@ library(GAM.db)
 library(GAM.networks)
 library(RCurl)
 library(parallel)
+library(xlsx)
+library(pryr)
+
+"%o%" <- compose
 
 options(shiny.error=traceback)
+options(shiny.fullstacktrace=TRUE)
 
 data("met.id.map")
 data("kegg.human.network")
@@ -20,6 +25,11 @@ kegg.mouse.network$rxn2name$name <- ""
 kegg.human.network$rxn2name$name <- ""
 kegg.arabidopsis.network$rxn2name$name <- ""
 kegg.yeast.network$rxn2name$name <- ""
+
+removeNAColumns <- function(d) {
+    keep <- !sapply(d, all %o% is.na)
+    d[, keep, with=F]
+}
 
 networks <- list(
     "mmu"=kegg.mouse.network,
@@ -600,10 +610,8 @@ shinyServer(function(input, output, session) {
         }
     })
 
-    
-    rawModuleInput <- reactive({
+    esScoredInput <- reactive({
         input$find
-        #input$runAll
         met.fdr <- isolate(metFDR())
         gene.fdr <- isolate(geneFDR())
         absent.met.score <- isolate(input$absentMetScore)
@@ -617,35 +625,54 @@ shinyServer(function(input, output, session) {
         }
 
         longProcessStart()
+        message(paste0(".mp", # min p-value
+                       if (es$reactions.as.edges) ".re" else ".rn",
+                       ".mf=", format(met.fdr, scientific=T),
+                       ".rf=", format(gene.fdr, scientific=T),
+                       ".ams=", absent.met.score
+                       #, ".ars=", absent.rxn.score
+                       ))
+
+        res <- scoreNetwork(es,
+                            met.fdr=met.fdr,
+                            rxn.fdr=gene.fdr,
+                            absent.met.score=absent.met.score,
+                            #absent.rxn.score=absent.rxn.score,
+                            met.score=-0.01,
+                            rxn.score=-0.01)
+
+        res$description.string <- paste0(".mp", # min p-value
+                                         if (es$reactions.as.edges) ".re" else ".rn",
+                                         ".mf=", format(met.fdr, scientific=T),
+                                         ".rf=", format(gene.fdr, scientific=T),
+                                         ".ams=", absent.met.score
+                                         #, ".ars=", absent.rxn.score
+                                         )
+        res
+    })
+    
+    rawModuleInput <- reactive({
+        input$find
+        
+        esScored <- isolate(esScoredInput())
+        
+        if (is.null(esScored)) {
+            return(NULL)
+        }
+
+        longProcessStart()
         tryCatch({
             solver <- isolate(getSolver())
-            message(paste0(".mp", # min p-value
-                                             if (es$reactions.as.edges) ".re" else ".rn",
-                                             ".mf=", format(met.fdr, scientific=T),
-                                             ".rf=", format(gene.fdr, scientific=T),
-                                             ".ams=", absent.met.score
-                                            #, ".ars=", absent.rxn.score
-                                             ))
 
-            res <- findModule(es,
-                        met.fdr=met.fdr,
-                        rxn.fdr=gene.fdr,
-                        absent.met.score=absent.met.score,
-                        #absent.rxn.score=absent.rxn.score,
-                        met.score=-0.01,
-                        rxn.score=-0.01,
+            #res <- induced.subgraph(esScored$subnet.scored, V(esScored$subnet.scored)[adj(adj(1))])
+
+            res <- findModule(esScored,
                         solver=solver)
             
             if (is.null(res) || length(V(res)) == 0) {
                 stop("No module found")
             }
-            res$description.string <- paste0(".mp", # min p-value
-                                             if (es$reactions.as.edges) ".re" else ".rn",
-                                             ".mf=", format(met.fdr, scientific=T),
-                                             ".rf=", format(gene.fdr, scientific=T),
-                                             ".ams=", absent.met.score
-                                            #, ".ars=", absent.rxn.score
-                                             )
+            res$description.string <- esScored$description.string
             res
         }, finally=longProcessStop())
     })
@@ -655,6 +682,10 @@ shinyServer(function(input, output, session) {
         if (is.null(module)) {
             return(NULL)
         }
+
+        # for consistency
+        module <- remove.vertex.attribute(module, "score")
+        module <- remove.edge.attribute(module, "score")
         
         es <- isolate(esInput())
         
@@ -669,10 +700,8 @@ shinyServer(function(input, output, session) {
                 module <- addMetabolitesForReactions(module, es)
                 module <- removeHangingNodes(module)
             }
-            
-            if ("log2FC" %in% list.vertex.attributes(module))
-            module <- addNormLogFC(module)
         }
+
             
         module$description.string <- rawModuleInput()$description.string
 
@@ -763,6 +792,38 @@ shinyServer(function(input, output, session) {
         res
     })
 
+    output$downloadXlsx <- downloadHandler(
+        filename = reactive({ paste0("module", moduleInput()$description.string, ".xlsx") }),
+        content = function(file) {
+            module <- moduleInput()
+            es <- isolate(esScoredInput())
+
+            wb <- createWorkbook()
+
+            vTable <- data.table(get.vertex.attributes(module))
+            eTable <- data.table(get.edge.attributes(module, include.ends=T))
+            if (es$reactions.as.edges) {
+                metTable <- vTable
+                metTable[, nodeType := NULL]
+                rxnTable <- eTable
+            } else {
+                metTable <- vTable[nodeType == "met",]
+                metTable[, nodeType := NULL]
+                rxnTable <- vTable[nodeType == "rxn",]
+                rxnTable[, nodeType := NULL]
+            }
+
+            metTable <- removeNAColumns(metTable)
+            rxnTable <- removeNAColumns(rxnTable)
+
+            addDataFrame(metTable, createSheet(wb, "metabolites"), row.names=F)
+            addDataFrame(rxnTable, createSheet(wb, "reactions"), row.names=F)
+
+            metInModule <- metTable$name
+            geneInModule <- rxnTable$origin
+
+            saveWorkbook(wb, file)
+        })
     
     output$downloadPDF <- downloadHandler(
         filename = reactive({ paste0("module", moduleInput()$description.string, ".pdf") }),

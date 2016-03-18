@@ -140,7 +140,8 @@ workPanel <- tagList(
                 h3("Module summary"),
                 uiOutput("moduleSummary"),
                 downloadButton("downloadPDF", "PDF"),
-                downloadButton("downloadModule", "XGMML")
+                downloadButton("downloadModule", "XGMML"),
+                downloadButton("downloadXlsx", "XLSX")
                 ),
             div(id="legend",
                 p(),
