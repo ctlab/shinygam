@@ -12,6 +12,7 @@ library(pryr)
 "%o%" <- compose
 
 options(shiny.error=traceback)
+#options(shiny.trace=TRUE)
 options(shiny.fullstacktrace=TRUE)
 
 data("met.id.map")
@@ -302,6 +303,13 @@ shinyServer(function(input, output, session) {
             # User has not uploaded a file yet
             return(NULL)
         }
+
+        if (!is(input$geneDE, "data.frame")) {
+            # Value was reset
+            return(NULL)
+        }
+        message("Gene DE:")
+        str(input$geneDE)
         message(sprintf("reading gene.de: %s", input$geneDE$name))
         
         res <- read.table.smart.de.gene(input$geneDE$datapath)
@@ -427,7 +435,11 @@ shinyServer(function(input, output, session) {
             # User has not uploaded a file yet
             return(NULL)
         }
-        
+        if (!is(input$metDE, "data.frame")) {
+            # Value was reset
+            return(NULL)
+        }
+
         message(sprintf("reading met.de: %s", input$metDE$name))
 
         res <- read.table.smart.de.met(input$metDE$datapath)

@@ -1,3 +1,11 @@
+resetFileInput = function(x) {
+    e = $("#" + x)
+    e.wrap('<form>').closest('form').get(0).reset();
+    e.unwrap();
+    $("#" + x + "_progress").css("visibility", "hidden");
+    Shiny.onInputChange(x, Date.now())
+}
+
 Shiny.addCustomMessageHandler("showWaitMessage",
         function(message) {
             if (message['value']) {

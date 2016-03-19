@@ -26,6 +26,14 @@ workPanel <- tagList(
         ),
     fixedRow(
         mySidebarPanel(
+            myActionButton("resetInput", label="Reset all", 
+                           onclick=paste(
+                                         'resetFileInput("geneDE"); resetFileInput("metDE")',
+                                         '$("#loadExampleGeneDE").attr("checked", false).trigger("change")',
+                                         '$("#loadExampleMetDE").attr("checked", false).trigger("change")',
+                                         '$("#preprocess").click(); $("#find").click()',
+                                         sep=";")
+                           ),
             checkboxInput(
                 "loadExampleGeneDE",
                 label="Example DE for genes",
