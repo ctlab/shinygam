@@ -1,3 +1,7 @@
+$(document).on('shiny:disconnected', function(event) {
+    alert('Your session has ended, please reload the page to restart');
+});
+
 resetFileInput = function(x) {
     e = $("#" + x)
     e.wrap('<form>').closest('form').get(0).reset();
