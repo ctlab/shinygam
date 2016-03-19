@@ -20,6 +20,7 @@ data("kegg.mouse.network")
 data("kegg.arabidopsis.network")
 data("kegg.yeast.network")
 
+
 # :ToDo: it's a hack
 kegg.mouse.network$rxn2name$name <- ""
 kegg.human.network$rxn2name$name <- ""
@@ -329,6 +330,7 @@ shinyServer(function(input, output, session) {
         }
         res
     })
+
     
     output$geneDESummary <- renderUI({
         gene.de <- geneDEInput()
@@ -355,6 +357,62 @@ shinyServer(function(input, output, session) {
         format(as.data.frame(head(data[order(pval)])), digits=3)
     })
     
+    notMappedGenes <- reactive({
+        network <- getNetwork()
+        gene.id.map <- network$gene.id.map
+        geneIT <- geneIdsType()
+
+        if (is.null(geneIT)) {
+            return(NULL)
+        }
+
+        if (geneIT == network$gene.ids) {
+            return(NULL)
+        }
+        notMapped <- setdiff(geneDEInput()$ID, gene.id.map[[geneIT]])
+        notMapped
+    })
+
+    output$geneDENotMapped <- renderUI({
+        data <- geneDEInput()
+        if (is.null(data)) {
+            return(NULL)
+        }
+        notMapped <- notMappedGenes()
+        network <- getNetwork()
+
+        div(
+            p(sprintf("Not mapped to %s: %s", network$gene.ids, length(notMapped))),
+            if (length(notMapped) > 0) { 
+                p("Top unmapped genes:",
+                  a("show",
+                    id="geneDENotMappedTableShowBtn",
+                    href="javascript:void()",
+                    onclick='$("#geneDENotMappedTable").show();$("#geneDENotMappedTableShowBtn").hide();$("#geneDENotMappedTableHideBtn").show()'),
+                  a("hide",
+                    id="geneDENotMappedTableHideBtn",
+                    href="javascript:void()",
+                    onclick='$("#geneDENotMappedTable").hide();$("#geneDENotMappedTableShowBtn").show();$("#geneDENotMappedTableHideBtn").hide()',
+                    style="display:none"),
+                  tag("script", '$("#geneDENotMappedTable").hide()')
+                  ) 
+            } else NULL)
+    })
+
+    output$geneDENotMappedTable <- renderTable({
+        data <- geneDEInput()
+        if (is.null(data)) {
+            return(NULL)
+        }
+        notMapped <- notMappedGenes()
+        if (length(notMapped) == 0) {
+            return(NULL)
+        }
+
+        data <- data[order(pval)]
+        data <- data[ID %in% notMapped]
+        format(as.data.frame(head(data, n=20)), digits=3)
+    })
     
     metDEInput <- reactive({
         if (loadExample()) {
@@ -390,7 +448,6 @@ shinyServer(function(input, output, session) {
         if (is.null(data)) {
             return(NULL)
         }
-        GAM:::lazyData("met.id.map")
         res <- getIdType(data$ID, met.id.map)
         if (length(res) != 1) {
             stop("Can't determine type of IDs for metabolites")
@@ -421,6 +478,61 @@ shinyServer(function(input, output, session) {
             return(NULL)
         }
         format(as.data.frame(head(data[order(pval)])), digits=3)
+    })
+    
+    notMappedMets <- reactive({
+        network <- getNetwork()
+        metIT <- metIdsType()
+
+        if (is.null(metIT)) {
+            return(NULL)
+        }
+
+        if (metIT == network$met.ids) {
+            return(NULL)
+        }
+        notMapped <- setdiff(metDEInput()$ID, met.id.map[[metIT]])
+    })
+
+    output$metDENotMapped <- renderUI({
+        data <- metDEInput()
+        if (is.null(data)) {
+            return(NULL)
+        }
+        notMapped <- notMappedMets()
+        network <- getNetwork()
+
+        div(
+            p(sprintf("Not mapped to %s: %s", network$met.ids, length(notMapped))),
+            if (length(notMapped) > 0) { 
+                p("Top unmapped metabolites:",
+                  a("show",
+                    id="metDENotMappedTableShowBtn",
+                    href="javascript:void()",
+                    onclick='$("#metDENotMappedTable").show();$("#metDENotMappedTableShowBtn").hide();$("#metDENotMappedTableHideBtn").show()'),
+                  a("hide",
+                    id="metDENotMappedTableHideBtn",
+                    href="javascript:void()",
+                    onclick='$("#metDENotMappedTable").hide();$("#metDENotMappedTableShowBtn").show();$("#metDENotMappedTableHideBtn").hide()',
+                    style="display:none"),
+                  tag("script", '$("#metDENotMappedTable").hide()')
+                  ) 
+            } else NULL)
+    })
+
+    output$metDENotMappedTable <- renderTable({
+        data <- metDEInput()
+        if (is.null(data)) {
+            return(NULL)
+        }
+        notMapped <- notMappedMets()
+        if (length(notMapped) == 0) {
+            return(NULL)
+        }
+
+        data <- data[order(pval)]
+        data <- data[ID %in% notMapped]
+        format(as.data.frame(head(data, n=20)), digits=3)
     })
     
     output$updateEsParameters <- renderJs({        
