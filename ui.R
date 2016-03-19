@@ -26,7 +26,7 @@ workPanel <- tagList(
         ),
     fixedRow(
         mySidebarPanel(
-            myActionButton("resetInput", label="Reset all", 
+            actionButton("resetInput", label="Reset all", 
                            onclick=paste(
                                          'resetFileInput("geneDE"); resetFileInput("metDE")',
                                          '$("#loadExampleGeneDE").attr("checked", false).trigger("change")',
