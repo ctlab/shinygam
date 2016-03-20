@@ -116,6 +116,10 @@ span.jslider {
   line-height: normal;
 }
 
+#disconnectedMessage p {
+    margin: 1em;
+}
+
 #module {
     background-color: #eee;
     width: 100%;

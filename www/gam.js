@@ -1,5 +1,5 @@
 $(document).on('shiny:disconnected', function(event) {
-    alert('Your session has ended, please reload the page to restart');
+    $("#disconnectedMessage").modal("show");
 });
 
 resetFileInput = function(x) {
