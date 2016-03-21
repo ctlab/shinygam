@@ -157,9 +157,7 @@ workPanel <- tagList(
                 ),
             div(id="legend",
                 p(),
-                div(style="color: red", "Red: log2FC > 0"),
-                div(style="color: green", "Green: log2FC < 0"),
-                div(style="color: #7777ff", "Blue: log2FC not available")
+                div(img(src="img/log2FCscale.svg"))
                 ),
             p(),
             downloadButton("downloadVizMap", "Cytoscape VizMap")
