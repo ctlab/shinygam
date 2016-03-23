@@ -176,15 +176,15 @@ papers.
 XGMML file with module can be imported into Cytoscape for consecutive exploring
 and processing. For the best experience we recommend to use GAM's
 VizMap style for Cytoscape that can be downloaded 
-<a id="downloadVizMapInHelp" class="shiny-download-link" href="" target="_blank">here</a>.
+[here](https://artyomovlab.wustl.edu/publications/supp_materials/GAM/GAM_VizMap.xml).
 
 You can load XGMML file (e.g. one
 [generated for default parameters](https://artyomovlab.wustl.edu/publications/supp_materials/GAM/module.mp.re.mf=1.258925e-01.rf=3.162278e-03.ams=-11.7.xgmml))
-using menu *File»Import»Network»File...* and selecting the file. Press OK on the pop-up dialog with import options.
-The module will appear as a single node, use menu *Layout»Apply preferred layout* to do a layout.
+using menu *File>Import>Network>File...* and selecting the file. Press OK on the pop-up dialog with import options.
+The module will appear as a single node, use menu *Layout>Apply preferred layout* to do a layout.
 Then load GAM Cytoscape VizMap 
-<a id="downloadVizMapInHelp" class="shiny-download-link" href="" target="_blank">style</a>
-using menu *File»Import»Style...* and then selecting it in the *Style* tab on the right, instead of *default*.
+[style](https://artyomovlab.wustl.edu/publications/supp_materials/GAM/GAM_VizMap.xml)
+using menu *File>Import>Style...* and then selecting it in the *Style* tab on the right, instead of *default*.
 The result should look like this:
 
 ![Module loaded in Cytoscape](img/cytoscape.png)
