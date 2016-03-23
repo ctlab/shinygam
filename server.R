@@ -236,9 +236,9 @@ simpleSelectInput <- function (inputId, choices, selected = NULL)
 
 # not sure if works
 example.gene.de <- force(as.data.table(read.table(text=getURL(example.gene.de.path), stringsAsFactors=FALSE, header=1)))
-attr(example.gene.de, "name") <- "example"
+attr(example.gene.de, "name") <- basename(example.gene.de.path)
 example.met.de <- force(as.data.table(read.table(text=getURL(example.met.de.path), stringsAsFactors=FALSE, header=1)))
-attr(example.met.de, "name") <- "example"
+attr(example.met.de, "name") <- basename(example.met.de.path)
 
 generateFDRs <- function(es) {
     res <- ""
@@ -900,7 +900,7 @@ shinyServer(function(input, output, session) {
         res <- paste0(df, ".svg")
         system2("neato", c("-Tsvg", 
                            "-o", res,
-                           df))
+                           df), stderr=NULL)
         res
     })
 
@@ -912,7 +912,7 @@ shinyServer(function(input, output, session) {
         res <- paste0(df, ".pdf")
         system2("neato", c("-Tpdf", 
                            "-o", res,
-                           df))
+                           df), stderr=NULL, stderr=NULL)
         res
     })
 

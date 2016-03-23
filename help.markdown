@@ -11,15 +11,18 @@ The analysis consists of two steps:
   to the provided data.
 * Step 2: Finding a connected reaction module that contains the most significant changes.
 
+*Reset all* button allows to start the analysis from the beginning, clearing the input data sets.
+*Example DE for genes* and *Example DE for metabolites* checkboxe automatically upload
+corresponding example data for mouse macrophages M1 vs M2 activation.
+
 #### Constructing a network
 
 To construct a network select an organism from the *Select an organism*
 dropdown menu. Only reactions possible in the selected organism are used.
-Currently supported organisms are Homo sapiens and Mus musculus. Please, 
+Currently supported organisms are Homo sapiens, Mus musculus, Arabidopsis thaliana 
+and Saccharomyces cerevisiae. Please, 
 send requests for additional organisms to Alexey Sergushichev at 
 asergushichev @ path.wustl.edu.
-
-<!-- :ToDo: add a screenshot? -->
 
 The next step is to upload differential expression (DE) data
 for genes and/or metabolites. GAM can be run using
@@ -44,7 +47,16 @@ a network as node or edge attributes. Example data can be downloaded:
 * <div id="geneDEExample" style="display: inline-block" class="shiny-html-output"></div> for genes and
 * <div id="metDEExample" style="display: inline-block" class="shiny-html-output"></div> for metabolites.
 
-After files are uploaded, a file summary is displayed. Verify that the files
+We also provide example data with differential gene expression for 
+* human [MCF10A cell line treated with 2DG](https://artyomovlab.wustl.edu/publications/supp_materials/GAM/MCF10A.Ctrl.vs.2DG.gene.de.tsv)
+(from [GSE59228](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE59228)),
+* arabidopsis [wild-type vs allene oxide synthase (AOS) knock-out mutant](https://artyomovlab.wustl.edu/publications/supp_materials/GAM/ath.wt60min_vs_aos60min.gene.de.tsv) 
+(from [Landesfeind et al, PeerJ 2014](https://peerj.com/articles/239/)),
+* yeast [response to hypoxia](https://artyomovlab.wustl.edu/publications/supp_materials/GAM/yeast.normoxia_vs_hypoxia.tsv)
+(from [GSE9514](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE9514)).
+
+After files are uploaded, a file summary is displayed. In the bottom of the summary rows 
+with IDs that were not mapped to the IDs used in network (e.g. Entrez for mouse) are shown. Verify that the files
 were parsed correctly.
 
 ![Summary of the example data](img/data_summary.png)
@@ -126,6 +138,8 @@ We use the following scheme:
 * Dashed edges are trans-RPAIRs.
 * Circle nodes represent metabolites, square nodes represent reactions.
 
+Additionally, raw field values are displayed in the node and edge tooltips.
+
 #### Post-processing
 
 There are couple of post-processing steps that are available. If in the network
@@ -136,10 +150,11 @@ that are not required for connectivity, but could help to interpret the results.
 
 #### Saving the module
 
-You can download the module in an PDF or XGMML format by clicking the corresponding
-button. XGMML file can be imported into Cytoscape. You can also download GAM's
-VizMap style for Cytoscape 
-<a id="downloadVizMapInHelp" class="shiny-download-link" href="" target="_blank">here</a>.
+You can download the module in several formats by clicking corresponding links:
+* PDF file contains the image of the module, as it appears on the web-site,
+* XGMML file contains module that can be imported into Cytoscape (see *Importing to Cytoscape section below*),
+* XLSX file contains simple table of metabolites and reactions in the module, along with corresponding fields (logPval, log2FC, ...).
+button.
 
 #### Interpreting the results
 
@@ -155,3 +170,22 @@ media perturbation or gene knockout/knockdown experiments. For examples
 see [Network integration of parallel metabolic and transcriptional data reveals metabolic modules that regulate macrophage polarization](http://www.ncbi.nlm.nih.gov/pubmed/25786174)
 and [Mitochondrial Phosphoenolpyruvate Carboxykinase Regulates Metabolic Adaptation and Enables Glucose-Independent Tumor Growth](http://www.ncbi.nlm.nih.gov/pubmed/26474064)
 papers. 
+
+#### Importing module into Cytoscape
+
+XGMML file with module can be imported into Cytoscape for consecutive exploring
+and processing. For the best experience we recommend to use GAM's
+VizMap style for Cytoscape that can be downloaded 
+<a id="downloadVizMapInHelp" class="shiny-download-link" href="" target="_blank">here</a>.
+
+You can load XGMML file (e.g. one
+[generated for default parameters](https://artyomovlab.wustl.edu/publications/supp_materials/GAM/module.mp.re.mf=1.258925e-01.rf=3.162278e-03.ams=-11.7.xgmml))
+using menu *File»Import»Network»File...* and selecting the file. Press OK on the pop-up dialog with import options.
+The module will appear as a single node, use menu *Layout»Apply preferred layout* to do a layout.
+Then load GAM Cytoscape VizMap 
+<a id="downloadVizMapInHelp" class="shiny-download-link" href="" target="_blank">style</a>
+using menu *File»Import»Style...* and then selecting it in the *Style* tab on the right, instead of *default*.
+The result should look like this:
+
+![Module loaded in Cytoscape](img/cytoscape.png)
+
