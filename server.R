@@ -912,7 +912,7 @@ shinyServer(function(input, output, session) {
         res <- paste0(df, ".pdf")
         system2("neato", c("-Tpdf", 
                            "-o", res,
-                           df), stderr=NULL, stderr=NULL)
+                           df), stderr=NULL)
         res
     })
 
