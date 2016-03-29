@@ -100,7 +100,7 @@ read.table.smart <- function(path, ...) {
         } 
     }
 
-    res <- read.table(path, sep=sep, header=T, stringsAsFactors=F, check.names=F)
+    res <- read.table(path, sep=sep, header=T, stringsAsFactors=F, check.names=F, quote='"')
     res <- as.data.table(res, keep.rownames=is.character(attr(res, "row.names")))
     
     oldnames <- character(0)
