@@ -6,27 +6,21 @@ library(GAM.db)
 library(GAM.networks)
 library(RCurl)
 library(parallel)
-library(xlsx)
+#library(xlsx)
 library(pryr)
 
-"%o%" <- compose
+"%o%" <- pryr::compose
 
 options(shiny.error=traceback)
 #options(shiny.trace=TRUE)
 options(shiny.fullstacktrace=TRUE)
 
-data("met.id.map")
-data("kegg.human.network")
-data("kegg.mouse.network")
-data("kegg.arabidopsis.network")
-data("kegg.yeast.network")
+#data("met.id.map")
+#data("kegg.human.network")
+#data("kegg.mouse.network")
+#data("kegg.arabidopsis.network")
+#data("kegg.yeast.network")
 
-
-# :ToDo: it's a hack
-kegg.mouse.network$rxn2name$name <- ""
-kegg.human.network$rxn2name$name <- ""
-kegg.arabidopsis.network$rxn2name$name <- ""
-kegg.yeast.network$rxn2name$name <- ""
 
 removeNAColumns <- function(d) {
     keep <- !sapply(d, all %o% is.na)
@@ -34,10 +28,10 @@ removeNAColumns <- function(d) {
 }
 
 networks <- list(
-    "mmu"=kegg.mouse.network,
-    "hsa"=kegg.human.network,
-    "ath"=kegg.arabidopsis.network,
-    "sce"=kegg.yeast.network
+    "mmu"="kegg.mouse.network",
+    "hsa"="kegg.human.network",
+    "ath"="kegg.arabidopsis.network",
+    "sce"="kegg.yeast.network"
     )
 
 
@@ -279,16 +273,24 @@ shinyServer(function(input, output, session) {
         session$sendCustomMessage(type='showWaitMessage', list(value=F))
     }
 
+    output$initialized <- renderJs('$("#initializing").hide()')
+
     loadExample <- reactive({
         input$loadExampleGeneDE || input$loadExampleMetDE
     })
 
     getNetwork <- reactive({
-        if (loadExample()) {
-            kegg.mouse.network
+        net <- if (loadExample()) {
+            "kegg.mouse.network"
         } else {
             networks[[input$network]]
         }
+
+        GAM:::lazyData(net)
+        res <- get(net)
+        # :ToDo: it's a hack
+        res$rxn2name$name <- ""
+        res
     })
 
     geneDEInput <- reactive({
@@ -460,6 +462,7 @@ shinyServer(function(input, output, session) {
         if (is.null(data)) {
             return(NULL)
         }
+        GAM:::lazyData("met.id.map")
         res <- getIdType(data$ID, met.id.map)
         if (length(res) != 1) {
             stop("Can't determine type of IDs for metabolites")
@@ -503,6 +506,7 @@ shinyServer(function(input, output, session) {
         if (metIT == network$met.ids) {
             return(NULL)
         }
+        GAM:::lazyData("met.id.map")
         notMapped <- setdiff(metDEInput()$ID, met.id.map[[metIT]])
     })
 
@@ -921,6 +925,7 @@ shinyServer(function(input, output, session) {
         content = function(file) {
             module <- moduleInput()
             es <- isolate(esScoredInput())
+            stopifnot(require(xlsx))
 
             wb <- createWorkbook()
 

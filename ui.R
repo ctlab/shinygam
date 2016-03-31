@@ -192,6 +192,7 @@ shinyUI(
     div(id="updateEsParameters", class="js-output"),
 
     titlePanel("Shiny GAM: integrated analysis of genes and metabolites"),
+    div(id="initialized", class="js-output"),
 
     fixedRow(
     column(12,

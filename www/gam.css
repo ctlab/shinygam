@@ -83,6 +83,8 @@ span.jslider {
 
 #loading {
     display:none;
+}
+.loading {
     position:absolute;
     top:0;
     left:0;
@@ -95,7 +97,7 @@ span.jslider {
     color:#fff;
 }
 
-#loading-dialog {
+.loading-dialog {
     position:fixed;
     left:50%;
     top:50%;
@@ -110,7 +112,7 @@ span.jslider {
     border-radius: 5px;
 }
 
-#loading-dialog span {
+.loading-dialog span {
   display: inline-block;
   vertical-align: middle;
   line-height: normal;
