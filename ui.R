@@ -125,10 +125,10 @@ workPanel <- tagList(
                                  max=0, min=-100, value=-20, step=1)
                     ),
                 myActionButton("resetFDRs", "Autogenerate FDRs", disabled=""),
-                checkboxInput(
-                    "solveToOptimality", 
-                    label="Try to solve to optimality",
-                    value=FALSE),
+                #checkboxInput(
+                #    "solveToOptimality", 
+                #    label="Try to solve to optimality",
+                #    value=FALSE),
                 conditionalPanel("network.available",
                     uiOutput("solverString")
                 ),

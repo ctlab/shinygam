@@ -8,6 +8,8 @@ library(RCurl)
 library(parallel)
 #library(xlsx)
 library(pryr)
+library(plyr)
+source("functions.R")
 
 "%o%" <- pryr::compose
 
@@ -22,10 +24,6 @@ options(shiny.fullstacktrace=TRUE)
 #data("kegg.yeast.network")
 
 
-removeNAColumns <- function(d) {
-    keep <- !sapply(d, all %o% is.na)
-    d[, keep, with=F]
-}
 
 networks <- list(
     "mmu"="kegg.mouse.network",
@@ -34,37 +32,6 @@ networks <- list(
     "sce"="kegg.yeast.network"
     )
 
-
-gmwcs.solver <- function (gmwcs, nthreads = 1, timeLimit = -1) {
-  function(network) {
-    network.orig <- network
-    score.edges <- "score" %in% list.edge.attributes(network)
-    score.nodes <- "score" %in% list.vertex.attributes(network)
-    graph.dir <- tempfile("graph")
-    dir.create(graph.dir)
-    edges.file <- file.path(graph.dir, "edges.txt")
-    nodes.file <- file.path(graph.dir, "nodes.txt")
-    if (!score.nodes) {
-      V(network)$score <- 0
-    }
-    
-    BioNet::writeHeinzNodes(network, file = nodes.file, use.score = TRUE)
-    BioNet::writeHeinzEdges(network, file = edges.file, use.score = score.edges)
-    system2(gmwcs, c("-n", nodes.file, "-e", edges.file, 
-                     "-m", nthreads, "-t", timeLimit
-                      ,             "-b"
-    ))
-    solution.file <- paste0(nodes.file, ".out")
-    if (!file.exists(solution.file)) {
-      warning("Solution file not found")
-      return(NULL)
-    }
-    res <- GAM:::readGraph(node.file = solution.file,
-                     edge.file = paste0(edges.file, ".out"),
-                     network = network)
-    return(res)
-  }
-}
 
 heinz2 <- "/usr/local/lib/heinz2/heinz"
 h.solver <- heinz.solver("/usr/local/lib/heinz/heinz.py", timeLimit=4*60)
@@ -75,158 +42,17 @@ attr(h2.solver, "description") <- "Heinz2 (time limit = 30s)"
 g.solver <- gmwcs.solver("gmwcs", timeLimit=30, nthreads=detectCores())
 attr(g.solver, "description") <- "gmwcs (time limit = 30s)"
 
-
+s.solver <- sgmwcs.solver.eps("sgmwcs", 
+                      nthreads = detectCores(), 
+                      timeLimit = 30, 
+                      nodes.group.by = "formula * score",
+                      edges.group.by="origin", 
+                      group.only.positive = T)
+attr(s.solver, "description") <- "signal gmwcs (time limit = 30s)"
 
 example.gene.de.path <- "http://artyomovlab.wustl.edu/publications/supp_materials/GAM/Ctrl.vs.MandLPSandIFNg.gene.de.tsv"
 example.met.de.path <- "http://artyomovlab.wustl.edu/publications/supp_materials/GAM/Ctrl.vs.MandLPSandIFNg.met.de.tsv"
 
-read.table.smart <- function(path, ...) {
-    fields <- list(...)    
-    conn <- file(path)
-    header <- readLines(conn, n=1)
-    close(conn)
-    
-    sep <- "\t"
-    for (s in c("\t", " ", ",")) {
-        if (grepl(s, header)) {
-            sep <- s
-            break
-        } 
-    }
-
-    res <- read.table(path, sep=sep, header=T, stringsAsFactors=F, check.names=F, quote='"')
-    res <- as.data.table(res, keep.rownames=is.character(attr(res, "row.names")))
-    
-    oldnames <- character(0)
-    newnames <- character(0)
-
-    normalizeName <- function(x) {
-        gsub("[^a-z0-9]", "", tolower(x)) 
-    }
-    
-    for (field in names(fields)) {        
-        if (field %in% colnames(res)) {
-            next
-        }
-        
-        z <- na.omit(
-            match(
-                normalizeName(c(field, fields[[field]])),
-                normalizeName(colnames(res))))
-        if (length(z) == 0) {
-            next
-        }
-        
-        oldnames <- c(oldnames, colnames(res)[z[1]])
-        newnames <- c(newnames, field)
-    }
-        
-    setnames(res, oldnames, newnames)
-    res
-}
-
-read.table.smart.de <- function(path, ID=ID) {
-    read.table.smart(path, ID=ID, pval=c("pvalue"), log2FC=c("log2foldchange", "logfc"), name.orig=c("name"))
-}
-
-
-read.table.smart.de.gene <- function(path) {
-    read.table.smart.de(path, ID=c("gene", "entrez", "", "rn", "symbol"))
-}
-
-read.table.smart.de.met <- function(path) {
-    read.table.smart.de(path, ID=c("metabolite", "kegg", "hmdb", "", "rn"))
-}
-
-renderGraph <- function(expr, env=parent.frame(), quoted=FALSE) {
-    # Convert the expression + environment into a function
-    func <- exprToFunction(expr, env, quoted)
-    
-    function() {
-        val <- func()
-        if (is.null(val)) {
-            return(list(nodes=list(), links=list()));
-        }
-        for (a in list.vertex.attributes(val)) {
-            if (!is.numeric(get.vertex.attribute(val, a))) {
-                next
-            }
-            print(a)
-            vs <- get.vertex.attribute(val, a)
-            vs[which(vs == Inf)] <- 1e100
-            vs[which(vs == -Inf)] <- -1e100
-            val <- set.vertex.attribute(val, a, index=V(val), value=vs)
-        }
-        for (a in list.edge.attributes(val)) {
-            if (!is.numeric(get.edge.attribute(val, a))) {
-                next
-            }
-            print(a)
-            vs <- get.edge.attribute(val, a)
-            vs[which(vs == Inf)] <- 1e100
-            vs[which(vs == -Inf)] <- -1e100
-            val <- set.edge.attribute(val, a, index=E(val), value=vs)
-        }
-        module2list(val)
-    }
-}
-
-necessary.de.fields <- c("ID", "pval")
-
-vector2html <- function(v) {
-    paste0("<ul>\n",
-           paste("<li>", names(v), ": ", v, "</li>\n", collapse=""),
-           "</ul>\n")
-}
-
-renderJs <- function(expr, env=parent.frame(), quoted=FALSE) {
-    # Convert the expression + environment into a function
-    func <- exprToFunction(expr, env, quoted)
-    
-    function() {
-        val <- func()
-        paste0(val, ";", 
-               paste(sample(1:20, 10, replace=T), collapse=""))
-    }
-}
-
-toJsLiteral <- function(x) {
-    if (is(x, "numeric")) {
-        if (x == Inf) {
-            return("Infinity")
-        } else {
-            return("-Infinity")
-        }
-        return(as.character(x))
-    } else if (is(x, "character")) {
-        return(shQuote(x));
-    } else if (is(x, "logical")) {
-        return(if (x) "true" else "false")
-    } else {
-        stop(paste0("can't convert ", x, " to JS literal"))
-    }
-}
-
-makeJsAssignments  <- function(...) {
-    args <- list(...)
-    values <- sapply(args, toJsLiteral)
-    paste0(names(values), " = ", values, ";\n", collapse="")
-}
-
-# adapted from shiny
-simpleSelectInput <- function (inputId, choices, selected = NULL) 
-{
-    selectTag <- tags$select(id = inputId)
-    optionTags <- mapply(choices, names(choices), SIMPLIFY = FALSE, 
-        USE.NAMES = FALSE, FUN = function(choice, name) {
-            optionTag <- tags$option(value = choice, name)
-            if (choice %in% selected) 
-                optionTag$attribs$selected = "selected"
-            optionTag
-        })
-    selectTag <- tagSetChildren(selectTag, list = optionTags)
-    selectTag
-}
 
 # not sure if works
 example.gene.de <- force(as.data.table(read.table(text=getURL(example.gene.de.path), stringsAsFactors=FALSE, header=1)))
@@ -236,14 +62,14 @@ attr(example.met.de, "name") <- basename(example.met.de.path)
 
 generateFDRs <- function(es) {
     res <- ""
-    num.positive = 150
-    if (is.null(es$fb.met) != is.null(es$fb.rxn)) {
-        num.positive <- num.positive / 2
-    }
+    num.positive = 75
+    #if (is.null(es$fb.met) != is.null(es$fb.rxn)) {
+    #    num.positive <- num.positive / 2
+    #}
 
     if (!is.null(es$fb.met)) {
         fb <- es$fb.met
-        pvals <- with(es$met.de.ext, { x <- pval; names(x) <- ID; na.omit(x) })            
+        pvals <- with(es$met.de.ext, { x <- pval; names(x) <- ID; unique(na.omit(x)) })            
         recMetFDR <- GAM:::recommendedFDR(fb, pvals, num.positive=num.positive)
         recAbsentMetScore <- min(GAM:::scoreValue(fb, 1, recMetFDR), -0.1)
         if (!is.null(es$fb.rxn)) {
@@ -255,7 +81,7 @@ generateFDRs <- function(es) {
     
     if (!is.null(es$fb.rxn)) {
         fb <- es$fb.rxn
-        pvals <- with(es$rxn.de.ext, { x <- pval; names(x) <- ID; na.omit(x) })            
+        pvals <- with(es$rxn.de.ext, { x <- pval; names(x) <- ID; unique(na.omit(x)) })            
         recRxnFDR <- GAM:::recommendedFDR(fb, pvals, num.positive=num.positive)
         res <- paste0(res, sprintf('$("#geneLogFDR").val(%.1f).trigger("change");', log10(recRxnFDR)))
     }
@@ -552,7 +378,8 @@ shinyServer(function(input, output, session) {
     })
     
     output$updateEsParameters <- renderJs({        
-        selected <- if (!is.null(metDEInput())) "edges" else "nodes"
+        #selected <- if (!is.null(metDEInput())) "edges" else "nodes"
+        selected <- "edges"
         return(sprintf("$('#reactionsAs')[0].selectize.setValue('%s')", selected))
     })
 # 
@@ -719,13 +546,15 @@ shinyServer(function(input, output, session) {
             return(NULL)
         }
 
-        if (input$solveToOptimality) {
-            h.solver
-        } else if (es$reactions.as.edges && !is.null(es$fb.rxn)) {
-            g.solver
-        } else {
-            h2.solver
-        }
+        s.solver
+
+        #if (input$solveToOptimality) {
+        #    h.solver
+        #} else if (es$reactions.as.edges && !is.null(es$fb.rxn)) {
+        #    g.solver
+        #} else {
+        #    h2.solver
+        #}
     })
 
     output$solverString <- reactive({
@@ -766,8 +595,8 @@ shinyServer(function(input, output, session) {
                             rxn.fdr=gene.fdr,
                             absent.met.score=absent.met.score,
                             #absent.rxn.score=absent.rxn.score,
-                            met.score=-0.01,
-                            rxn.score=-0.01)
+                            met.score=0,
+                            rxn.score=0)
 
         res$description.string <- paste0(".mp", # min p-value
                                          if (es$reactions.as.edges) ".re" else ".rn",
