@@ -84,6 +84,16 @@ span.jslider {
 #loading {
     display:none;
 }
+
+#disconnectedMessage {
+    display:none;
+    color: #000;
+}
+
+.disconnected #disconnectedMessage {
+    display:block
+}
+
 .loading {
     position:absolute;
     top:0;

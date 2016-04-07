@@ -1,7 +1,3 @@
-$(document).on('shiny:disconnected', function(event) {
-    $("#disconnectedMessage").modal("show");
-});
-
 resetFileInput = function(x) {
     e = $("#" + x)
     e.wrap('<form>').closest('form').get(0).reset();
