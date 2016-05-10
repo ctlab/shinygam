@@ -119,7 +119,7 @@ Heinz solver (Dittrich at al. 2008) is called when the option *Try to solve to o
 selected. Solving to optimality can take a relatively long time, so we provide two other 
 solvers that can be run for a predefined amount of time. These are Heinz 2 
 (El-Kebir&Klau 2014, https://software.cwi.nl/cwisoftware/software/heinz), which is used when edges are not scored, and gmwcs 
-(https://github.com/ctlab/gmwcs-solver), which is used when edges are scored.
+(https://github.com/ctlab/gmwcs-solver, http://arxiv.org/abs/1605.02168), which is used when edges are scored.
 
 
 Click *Step 2: Find module* button to find a module in the network. The module will
