@@ -8,6 +8,8 @@ library(RCurl)
 library(parallel)
 #library(xlsx)
 library(pryr)
+library(logging)
+addHandler(writeToFile, file="/dev/stderr", level='DEBUG')
 
 "%o%" <- pryr::compose
 
@@ -121,6 +123,9 @@ read.table.smart <- function(path, ...) {
         newnames <- c(newnames, field)
     }
         
+    logdebug("smart renaming")
+    logdebug("from: %s", paste0(oldnames, collapse=" "))
+    logdebug("to: %s", paste0(newnames, collapse=" "))
     setnames(res, oldnames, newnames)
     res
 }
@@ -131,11 +136,19 @@ read.table.smart.de <- function(path, ID=ID) {
 
 
 read.table.smart.de.gene <- function(path) {
-    read.table.smart.de(path, ID=c("gene", "entrez", "", "rn", "symbol"))
+    res <- read.table.smart.de(path, ID=c("gene", "entrez", "", "rn", "symbol"))
+    if (!"ID" %in% colnames(res)) {
+        setnames(res, colnames(res)[1], "ID")
+    }
+    res
 }
 
 read.table.smart.de.met <- function(path) {
-    read.table.smart.de(path, ID=c("metabolite", "kegg", "hmdb", "", "rn"))
+    res <- read.table.smart.de(path, ID=c("metabolite", "kegg", "hmdb", "", "rn"))
+    if (!"ID" %in% colnames(res)) {
+        setnames(res, colnames(res)[1], "ID")
+    }
+    res
 }
 
 renderGraph <- function(expr, env=parent.frame(), quoted=FALSE) {
@@ -260,7 +273,6 @@ generateFDRs <- function(es) {
         res <- paste0(res, sprintf('$("#geneLogFDR").val(%.1f).trigger("change");', log10(recRxnFDR)))
     }
             
-    message(sprintf("Generated FDRs: %s", res))
     res
 }
 
@@ -310,13 +322,15 @@ shinyServer(function(input, output, session) {
             # Value was reset
             return(NULL)
         }
-        message("Gene DE:")
-        str(input$geneDE)
-        message(sprintf("reading gene.de: %s", input$geneDE$name))
+        loginfo("GeneDE file:")
+        loginfo(capture.output(str(input$geneDE)))
+        loginfo("reading gene.de: %s", input$geneDE$name)
         
         res <- read.table.smart.de.gene(input$geneDE$datapath)
+        logdebug(capture.output(str(res)))
         if (!all(necessary.de.fields %in% names(res))) {
-            if (grep("xlsx?$", input$geneDE$name)) {
+            loginfo("not all fields in DE file: %s", input$geneDE$datapath)
+            if (grepl("xlsx?$", input$geneDE$name)) {
                 stop("We do not support excel files yet, please, use tab-separated files instead")
             } else{
                 stop(paste0("Genomic differential expression data should contain at least these fields: ", 
@@ -442,11 +456,15 @@ shinyServer(function(input, output, session) {
             return(NULL)
         }
 
-        message(sprintf("reading met.de: %s", input$metDE$name))
+        loginfo("MetDE file:")
+        loginfo(capture.output(str(input$metDE)))
+        loginfo("reading met.de: %s", input$geneDE$name)
 
         res <- read.table.smart.de.met(input$metDE$datapath)
+        logdebug(capture.output(str(res)))
         if (!all(necessary.de.fields %in% names(res))) {
-            if (grep("xlsx?$", input$metDE$name)) {
+            loginfo("not all fields in DE file: %s", input$metDE$datapath)
+            if (grepl("xlsx?$", input$metDE$name)) {
                 stop("We do not support excel files yet, please, use tab-separated files instead")
             } else {
                 stop(paste0("Metabolic differential expression data should contain at least these fields: ", 
@@ -572,7 +590,7 @@ shinyServer(function(input, output, session) {
 
     esInput <- reactive({
         input$preprocess
-        message("preprocessing")
+        loginfo("Preprocessing")
         #input$runAll
         network <- isolate(getNetwork())
         gene.de <- isolate(geneDEInput())
@@ -637,7 +655,6 @@ shinyServer(function(input, output, session) {
         } else {
             res <- ""
         }
-        message(sprintf("res: %s", res))
         res 
     })
 
@@ -693,7 +710,6 @@ shinyServer(function(input, output, session) {
             res <- paste0(res, '$("#runStep1").attr("disabled", "disabled");')
             res <- paste0(res, '$("#runAll").attr("disabled", "disabled");')
         }
-        message(res)
         res
     })
     
@@ -753,7 +769,7 @@ shinyServer(function(input, output, session) {
         }
 
         longProcessStart()
-        message(paste0(".mp", # min p-value
+        loginfo(paste0(".mp", # min p-value
                        if (es$reactions.as.edges) ".re" else ".rn",
                        ".mf=", format(met.fdr, scientific=T),
                        ".rf=", format(gene.fdr, scientific=T),
