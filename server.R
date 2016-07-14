@@ -68,11 +68,46 @@ gmwcs.solver <- function (gmwcs, nthreads = 1, timeLimit = -1) {
   }
 }
 
-heinz2 <- "/usr/local/lib/heinz2/heinz"
+heinz21.solver <- function(heinz2, nthreads = 1, timeLimit = -1) 
+{
+    function(network) {
+        network.orig <- network
+        score.edges <- "score" %in% list.edge.attributes(network)
+        score.nodes <- "score" %in% list.vertex.attributes(network)
+        graph.dir <- tempfile("graph")
+        dir.create(graph.dir)
+        edges.file <- file.path(graph.dir, "edges.txt")
+        nodes.file <- file.path(graph.dir, "nodes.txt")
+        if (!score.nodes) {
+            V(network)$score <- 0
+        }
+        if (score.edges) {
+            network <- GAM:::MWCSize(network.orig)
+        }
+        BioNet::writeHeinzNodes(network, file = nodes.file, use.score = TRUE)
+        BioNet::writeHeinzEdges(network, file = edges.file, use.score = score.edges)
+        solution.file <- file.path(graph.dir, "sol.txt")
+        system2(paste0(heinz2), c("-n", nodes.file, "-e", edges.file, 
+                                  "-o", solution.file, "-m", nthreads, "-v", 
+                                  0, "-t", timeLimit))
+        if (!file.exists(solution.file)) {
+            warning("Solution file not found")
+            return(NULL)
+        }
+        res <- BioNet::readHeinzGraph(node.file = solution.file, network = network, 
+                                      format = "igraph")
+        if (score.edges) {
+            res <- GAM:::deMWCSize(res, network.orig)
+        }
+        return(res)
+    }
+}
+
+heinz2 <- "/usr/local/lib/heinz2/heinz21"
 h.solver <- heinz.solver("/usr/local/lib/heinz/heinz.py", timeLimit=4*60)
 attr(h.solver, "description") <- "Heinz (time limit = 4m)"
 
-h2.solver <- heinz2.solver(heinz2, timeLimit=30, nthreads=detectCores())
+h2.solver <- heinz21.solver(heinz2, timeLimit=30, nthreads=detectCores())
 attr(h2.solver, "description") <- "Heinz2 (time limit = 30s)"
 g.solver <- gmwcs.solver("gmwcs", timeLimit=30, nthreads=detectCores())
 attr(g.solver, "description") <- "gmwcs (time limit = 30s)"
