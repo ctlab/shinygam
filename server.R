@@ -573,6 +573,16 @@ shinyServer(function(input, output, session) {
         selected <- if (!is.null(metDEInput())) "edges" else "nodes"
         return(sprintf("$('#reactionsAs')[0].selectize.setValue('%s')", selected))
     })
+
+    experimentTag <- reactive({
+        geneData <- geneDEInput()
+        metData <- metDEInput()
+        name <- if (!is.null(geneData)) attr(geneData, "name") else attr(metData, "name")
+        tag <- name
+        tag <- gsub("\\.gz$", "", tag)
+        tag <- gsub("\\.([ct]sv|txt)$", "", tag)
+        tag
+    })
 # 
 #     output$reactionsAsHolder <- renderUI({
 #         gene.de <- geneDEInput()
@@ -598,6 +608,7 @@ shinyServer(function(input, output, session) {
 
         met.de <- isolate(metDEInput())
         met.ids <- isolate(metIdsType())
+        tag <- isolate(experimentTag())
 
         if (is.null(gene.de) && is.null(met.de)) {
             return(NULL)
@@ -626,6 +637,7 @@ shinyServer(function(input, output, session) {
                 collapse.reactions=collapse.reactions,
                 use.rpairs=use.rpairs,
                 plot=F)
+            attr(es, "tag") <- tag
             es
         }, finally=longProcessStop())
     })
@@ -769,10 +781,10 @@ shinyServer(function(input, output, session) {
         }
 
         longProcessStart()
-        loginfo(paste0(".mp", # min p-value
+        loginfo(paste0(attr(es, "tag"),".mp", # min p-value
                        if (es$reactions.as.edges) ".re" else ".rn",
-                       ".mf=", format(met.fdr, scientific=T),
-                       ".rf=", format(gene.fdr, scientific=T),
+                       ".mf=", format(log10(met.fdr), digist=2),
+                       ".rf=", format(log10(gene.fdr), digist=2),
                        ".ams=", absent.met.score
                        #, ".ars=", absent.rxn.score
                        ))
@@ -785,10 +797,10 @@ shinyServer(function(input, output, session) {
                             met.score=-0.01,
                             rxn.score=-0.01)
 
-        res$description.string <- paste0(".mp", # min p-value
+        res$description.string <- paste0(attr(es, "tag"), 
                                          if (es$reactions.as.edges) ".re" else ".rn",
-                                         ".mf=", format(met.fdr, scientific=T),
-                                         ".rf=", format(gene.fdr, scientific=T),
+                                         ".mf=", format(log10(met.fdr), digist=2),
+                                         ".rf=", format(log10(gene.fdr), digist=2),
                                          ".ams=", absent.met.score
                                          #, ".ars=", absent.rxn.score
                                          )
@@ -895,7 +907,7 @@ shinyServer(function(input, output, session) {
         })
     
     output$downloadModule <- downloadHandler(
-        filename = reactive({ paste0("module", moduleInput()$description.string, ".xgmml") }),
+        filename = reactive({ paste0(moduleInput()$description.string, ".xgmml") }),
         content = function(file) {
             saveModuleToXgmml(moduleInput(), file=file, moduleInput()$description.string)
         })
@@ -937,7 +949,7 @@ shinyServer(function(input, output, session) {
     })
 
     output$downloadXlsx <- downloadHandler(
-        filename = reactive({ paste0("module", moduleInput()$description.string, ".xlsx") }),
+        filename = reactive({ paste0(moduleInput()$description.string, ".xlsx") }),
         content = function(file) {
             module <- moduleInput()
             es <- isolate(esScoredInput())
@@ -971,13 +983,14 @@ shinyServer(function(input, output, session) {
         })
     
     output$downloadPDF <- downloadHandler(
-        filename = reactive({ paste0("module", moduleInput()$description.string, ".pdf") }),
+        filename = reactive({ paste0(moduleInput()$description.string, ".pdf") }),
         content = function(file) {
             file.copy(pdfFile(), file) 
         })
 
     output$downloadDot <- downloadHandler(
-        filename = reactive({ paste0("module", moduleInput()$description.string, ".dot") }),
+
+        filename = reactive({ paste0(moduleInput()$description.string, ".dot") }),
         content = function(file) {
             file.copy(dotFile(), file) 
         })
