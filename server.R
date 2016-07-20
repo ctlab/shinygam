@@ -360,6 +360,7 @@ shinyServer(function(input, output, session) {
         loginfo("GeneDE file:")
         loginfo(capture.output(str(input$geneDE)))
         loginfo("reading gene.de: %s", input$geneDE$name)
+        loginfo("      from file: %s", input$geneDE$datapath)
         
         res <- read.table.smart.de.gene(input$geneDE$datapath)
         logdebug(capture.output(str(res)))
@@ -493,7 +494,8 @@ shinyServer(function(input, output, session) {
 
         loginfo("MetDE file:")
         loginfo(capture.output(str(input$metDE)))
-        loginfo("reading met.de: %s", input$geneDE$name)
+        loginfo("reading met.de: %s", input$metDE$name)
+        loginfo("     from file: %s", input$metDE$datapath)
 
         res <- read.table.smart.de.met(input$metDE$datapath)
         logdebug(capture.output(str(res)))
