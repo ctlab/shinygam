@@ -20,7 +20,7 @@ workPanel <- tagList(
             div(
                 class="alert alert-info",
                 role="alert",
-                HTML('If you have any feedback, please send it to <a href="mailto:asergushichev@path.wustl.edu">asergushichev@path.wustl.edu</a>')
+                HTML('Like Shiny GAM? Check out <a href="https://artyomovlab.wustl.edu/phantasus">Phantasus</a> where you can <a href="https://artyomovlab.wustl.edu/phantasus/phantasus-tutorial.html">do differential expression and submit the results to Shiny GAM</a>')
                 )
             )
         ),

@@ -1,6 +1,6 @@
 ### About
 
-By Alexey Sergushichev asergushichev@path.wustl.edu and co
+By Alexey Sergushichev alserg@corp.ifmo.ru and co
 
 You can find source code of this site <a href="https://github.com/ctlab/shinygam">here</a>.
 

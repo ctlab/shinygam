@@ -123,13 +123,8 @@ read.table.smart <- function(path, ...) {
     header <- readLines(conn, n=1)
     close(conn)
     
-    sep <- "\t"
-    for (s in c("\t", " ", ",")) {
-        if (grepl(s, header)) {
-            sep <- s
-            break
-        } 
-    }
+    seps <- c("\t", " ", ",", ";")
+    sep <- seps[which.max(table(unlist(strsplit(header, "")))[seps])]
 
     res <- read.table(path, sep=sep, header=T, stringsAsFactors=F, check.names=F, quote='"')
     res <- as.data.table(res, keep.rownames=is.character(attr(res, "row.names")))
@@ -171,7 +166,7 @@ read.table.smart.de <- function(path, ID=ID) {
 
 
 read.table.smart.de.gene <- function(path) {
-    res <- read.table.smart.de(path, ID=c("gene", "entrez", "", "rn", "symbol"))
+    res <- read.table.smart.de(path, ID=c("gene id", "gene", "entrez", "", "rn", "symbol"))
     if (!"ID" %in% colnames(res)) {
         setnames(res, colnames(res)[1], "ID")
     }
