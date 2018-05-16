@@ -23,6 +23,7 @@ options(shiny.fullstacktrace=TRUE)
 #data("kegg.arabidopsis.network")
 #data("kegg.yeast.network")
 
+uploaderPath <- "/mnt/data/upload"
 
 removeNAColumns <- function(d) {
     keep <- !sapply(d, all %o% is.na)
@@ -317,6 +318,25 @@ shinyServer(function(input, output, session) {
 
     output$initialized <- renderJs('$("#initializing").hide()')
 
+    queryValues <- reactiveValues()
+
+    observe({
+        query <- parseQueryString(session$clientData$url_search)
+        if ("organism" %in% names(query)) {
+            updateSelectInput(session, "network", selected=query$organism)
+            #values$queryOrganism <- query$organism
+        } 
+        
+        if ("geneDE_key" %in% names(query)) {
+            geneDE_key <- gsub("[^a-z0-9]", "", query$geneDE_key)
+            loginfo("found key: %s", geneDE_key)
+            if (geneDE_key == "") {
+                geneDE_key <- NULL
+            }
+            queryValues$geneDE_key <- geneDE_key
+        }
+     })
+
     loadExample <- reactive({
         input$loadExampleGeneDE || input$loadExampleMetDE
     })
@@ -343,21 +363,33 @@ shinyServer(function(input, output, session) {
             return(NULL)
         }
 
-        if (is.null(input$geneDE)) {
-            # User has not uploaded a file yet
-            return(NULL)
-        }
-
-        if (!is(input$geneDE, "data.frame")) {
+        if (!is.null(input$geneDE) && !is(input$geneDE, "data.frame")) {
             # Value was reset
             return(NULL)
         }
-        loginfo("GeneDE file:")
-        loginfo(capture.output(str(input$geneDE)))
-        loginfo("reading gene.de: %s", input$geneDE$name)
-        loginfo("      from file: %s", input$geneDE$datapath)
+
+        if (!is.null(input$geneDE)) {
+            loginfo("GeneDE file:")
+            loginfo(capture.output(str(input$geneDE)))
+            loginfo("reading gene.de: %s", input$geneDE$name)
+            loginfo("      from file: %s", input$geneDE$datapath)
+            
+            path <- input$geneDE$datapath
+            deName <- input$geneDE$name
+        } else if (!is.null(queryValues$geneDE_key)) {
+            # User has not uploaded a file yet but provided value by key
+            path <- file.path(uploaderPath, queryValues$geneDE_key)
+            loginfo("GeneDE from key, path: %s", path)
+            if (!file.exists(path)) {
+                return(NULL)
+            }
+            deName <- queryValues$geneDE_key
+        } else {
+            # User has not uploaded a file yet and we don't have a key
+            return(NULL)
+         }
         
-        res <- read.table.smart.de.gene(input$geneDE$datapath)
+        res <- read.table.smart.de.gene(path)
         logdebug(capture.output(str(res)))
         if (!all(necessary.de.fields %in% names(res))) {
             loginfo("not all fields in DE file: %s", input$geneDE$datapath)
@@ -368,7 +400,7 @@ shinyServer(function(input, output, session) {
                             paste(necessary.de.fields, collapse=", ")))
             }
         }
-        attr(res, "name") <- input$geneDE$name
+        attr(res, "name") <- deName
         res
     })
     
