@@ -69,6 +69,11 @@ heinz21.solver <- function(heinz2, nthreads = 1, timeLimit = -1)
     }
 }
 
+normalizeName <- function(x) {
+    gsub("[^a-z0-9]", "", tolower(x)) 
+}
+
+
 read.table.smart <- function(path, ...) {
     fields <- list(...)    
     conn <- file(path)
@@ -83,10 +88,6 @@ read.table.smart <- function(path, ...) {
     
     oldnames <- character(0)
     newnames <- character(0)
-    
-    normalizeName <- function(x) {
-        gsub("[^a-z0-9]", "", tolower(x)) 
-    }
     
     for (field in names(fields)) {        
         if (field %in% colnames(res)) {
@@ -117,10 +118,25 @@ read.table.smart.de <- function(path, ID=ID) {
 }
 
 
-read.table.smart.de.gene <- function(path) {
-    res <- read.table.smart.de(path, ID=c("gene id", "gene", "entrez", "", "rn", "symbol"))
-    if (!"ID" %in% colnames(res)) {
-        setnames(res, colnames(res)[1], "ID")
+read.table.smart.de.gene <- function(path, idsList) {
+    res <- read.table.smart.de(path, ID="ID")
+    idColumn <- findIdColumn(res, idsList)
+    if (idColumn$matchRatio < 0.1) {
+        z <- na.omit(
+            match(
+                normalizeName(c("ID", "gene id", "gene", "entrez", "", "rn", "symbol")),
+                normalizeName(colnames(res))))
+        if (length(z) == 0) {
+            setnames(res, colnames(res)[1], "ID")    
+        } else {
+            setnames(res, colnames(res)[z[1]], "ID")    
+        }
+        
+    } else {
+        if (idColumn$column != "ID" && "ID" %in% colnames(res)) {
+            setnames(res, "ID", "ID.old")
+        }
+        setnames(res, idColumn$column, "ID")
     }
     res
 }
@@ -250,4 +266,60 @@ generateFDRs <- function(es) {
     }
     
     res
+}
+
+
+.intersectionSize <- function(...) { length(intersect(...))}
+
+findIdColumn <- function(de, idsList,
+                         sample.size=1000,
+                         match.threshold=0.6,
+                         remove.ensembl.revisions=TRUE) {
+    # first looking for column with base IDs
+    de.sample <- if (nrow(de) < sample.size) {
+        copy(de)
+    } else {
+        de[sample(seq_len(nrow(de)), sample.size), ]
+    }
+    columnSamples <- lapply(de.sample, as.character)
+    
+    
+    if (remove.ensembl.revisions) {
+        columnSamples <- lapply(columnSamples, gsub,
+                                pattern="(ENS\\w*\\d*)\\.\\d*",
+                                replacement="\\1")
+    }
+    
+    ss <- sapply(columnSamples,
+                 .intersectionSize, idsList[[1]])
+    
+    if (max(ss) / nrow(de.sample) >= match.threshold) {
+        # we found a good column with base IDs
+        return(list(column=colnames(de)[which.max(ss)],
+                    type=names(idsList)[1],
+                    matchRatio=max(ss) / nrow(de.sample)))
+    }
+    
+    z <- .pairwiseCompare(.intersectionSize,
+                          columnSamples,
+                          idsList)
+    
+    bestMatch <- which(z == max(z), arr.ind = TRUE)[1,]
+    return(list(column=colnames(de)[bestMatch["row"]],
+                type=names(idsList)[bestMatch["col"]],
+                matchRatio=max(z) / nrow(de.sample)))
+}
+
+.pairwiseCompare <- function (FUN, list1, list2 = list1, ...)
+{
+    additionalArguments <- list(...)
+    f1 <- function(...) {
+        mapply(FUN = function(x, y) {
+            do.call(FUN, c(list(list1[[x]], list2[[y]]), additionalArguments))
+        }, ...)
+    }
+    z <- outer(seq_along(list1), seq_along(list2), FUN = f1)
+    rownames(z) <- names(list1)
+    colnames(z) <- names(list2)
+    z
 }

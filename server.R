@@ -113,12 +113,12 @@ shinyServer(function(input, output, session) {
             }
             return(NULL)
         }
-
+        
         if (!is.null(input$geneDE) && !is(input$geneDE, "data.frame")) {
             # Value was reset
             return(NULL)
         }
-
+        
         if (!is.null(input$geneDE)) {
             loginfo("GeneDE file:")
             loginfo(capture.output(str(input$geneDE)))
@@ -138,9 +138,12 @@ shinyServer(function(input, output, session) {
         } else {
             # User has not uploaded a file yet and we don't have a key
             return(NULL)
-         }
+        }
         
-        res <- read.table.smart.de.gene(path)
+        network <- getNetwork()
+        gene.id.map <- network$gene.id.map
+        
+        res <- read.table.smart.de.gene(path, idsList=gene.id.map)
         logdebug(capture.output(str(res)))
         if (!all(necessary.de.fields %in% names(res))) {
             loginfo("not all fields in DE file: %s", input$geneDE$datapath)
